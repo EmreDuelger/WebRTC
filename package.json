@@ -1,0 +1,18 @@
+{
+  "dependencies": {
+    "bootstrap": "^5.0.0",
+    "express": "^4.17.1",
+    "express-ws": "^4.0.0",
+    "fs": "*",
+    "handlebars": "^4.7.7",
+    "jquery": "^3.6.0",
+    "node-turn": "^0.0.6",
+    "nodejs-websocket": "^1.7.2",
+    "semantic-ui-css": "^2.4.1",
+    "signal-fire": "^0.5.3",
+    "simplewebrtc": "^1.19.1",
+    "socket.io": "^4.0.1",
+    "typescript": "^4.2.4",
+    "websocket": "^1.0.34"
+  }
+}
