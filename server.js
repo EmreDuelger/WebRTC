@@ -157,8 +157,18 @@ app.use('/scripts', express.static(`${__dirname}/node_modules/`));
 // Redirect all traffic to index.html
 
 app.get("/home", function(req, res){
-   res.sendFile(`${__dirname}/Frontend/index.html`);
+   res.sendFile(`${__dirname}/Frontend/login.html`);
 });
+
+app.get("/dashboard", function(req, res){
+   res.sendFile(`${__dirname}/Frontend/dashboard.html`);
+});
+
+app.get("/videocall", function(req, res){
+   res.sendFile(`${__dirname}/Frontend/videocall.html`);
+});
+
+
 app.get('/users', function(req, res){
 
    var obj = users;

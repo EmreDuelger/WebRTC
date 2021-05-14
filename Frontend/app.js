@@ -85,7 +85,6 @@ var remoteVideo = document.querySelector('#remoteVideo');
 var yourConn; 
 var stream;
   
-callPage.style.display = "none";
 
 // Login when the user clicks the button 
 loginBtn.addEventListener("click", function (event) { 
@@ -105,7 +104,9 @@ function handleLogin(success) {
       alert("Ooops...try a different username"); 
    } else { 
       loginPage.style.display = "none"; 
-      callPage.style.display = "block";
+      //callPage.style.display = "block";
+      window.location = "/Frontend/videocall.html";
+
       console.log('test')
       //********************** 
       //Starting a peer connection 
@@ -157,27 +158,29 @@ function handleLogin(success) {
 };
   
 //initiating a call 
-callBtn.addEventListener("click", function () { 
-   var callToUsername = callToUsernameInput.value;
-	
-   if (callToUsername.length > 0) { 
-	
-      connectedUser = callToUsername;
-		
-      // create an offer 
-      yourConn.createOffer(function (offer) { 
-         send({ 
-            type: "offer", 
-            offer: offer 
-         }); 
-			
-         yourConn.setLocalDescription(offer); 
-      }, function (error) { 
-         alert("Error when creating an offer"); 
-      });
-		
-   } 
-});
+
+if(callBtn){
+   callBtn.addEventListener("click", function () { 
+      var callToUsername = callToUsernameInput.value;
+      
+      if (callToUsername.length > 0) { 
+      
+         connectedUser = callToUsername;
+         
+         // create an offer 
+         yourConn.createOffer(function (offer) { 
+            send({ 
+               type: "offer", 
+               offer: offer 
+            }); 
+            
+            yourConn.setLocalDescription(offer); 
+         }, function (error) { 
+            alert("Error when creating an offer"); 
+         });
+         
+      } 
+   })};
   
 //when somebody sends us an offer 
 function handleOffer(offer, name) { 
@@ -208,7 +211,8 @@ function handleCandidate(candidate) {
    yourConn.addIceCandidate(new RTCIceCandidate(candidate)); 
 };
    
-//hang up 
+//hang up
+if(hangUpBtn){
 hangUpBtn.addEventListener("click", function () { 
 
    send({ 
@@ -216,7 +220,7 @@ hangUpBtn.addEventListener("click", function () {
    });  
 	
    handleLeave(); 
-});
+})};
   
 function handleLeave() { 
    connectedUser = null; 
