@@ -6,71 +6,98 @@
  *  that can be found in the LICENSE file in the root of the source
  *  tree.
 -->
-<html> 
- 
-   <head> 
-      <title>trAiner - your digital homegym-buddy</title>
-      <link rel = "stylesheet" href = "node_modules/bootstrap/dist/css/bootstrap.min.css"/>
-   </head>
-	
-   <style>
-	
-      body { 
-         background: #eee; 
-         padding: 5% 0; 
-      } 
-		
-      video { 
-         background: black; 
-         border: 1px solid gray; 
-      }
-		
-      .call-page { 
-         position: relative; 
-         display: block; 
-         margin: 0 auto; 
-         width: 500px; 
-         height: 500px; 
-      } 
-		
-      #localVideo { 
-         width: 150px; 
-         height: 150px; 
-         position: absolute; 
-         top: 15px; 
-         right: 15px; 
-      }
-		
-      #remoteVideo { 
-         width: 500px; 
-         height: 500px; 
-      }
-		
-   </style>
-	
-   <body>
-	
-   <div id = "callPage" class = "call-page"> 
-      <video id = "localVideo" autoplay></video> 
-      <video id = "remoteVideo" autoplay></video>
-		
-      <div class = "row text-center"> 
-         <div class = "col-md-12">
-            <select id = "myList" onclick = "getUsers()" >  
-            <option> ---Choose room--- </option>
-               
+<html>
+
+<head>
+   <title>trAiner - your digital homegym-buddy</title>
+   <link rel="stylesheet" href="node_modules/bootstrap/dist/css/bootstrap.min.css" />
+</head>
+
+<style>
+   body {
+      background: #eee;
+      padding: 5% 0;
+   }
+
+   video {
+      background: black;
+      border: 1px solid gray;
+   }
+
+   .call-page {
+      position: relative;
+      display: block;
+      margin: 0 auto;
+      width: 500px;
+      height: 500px;
+   }
+
+   #localVideo {
+      width: 150px;
+      height: 150px;
+      position: absolute;
+      top: 15px;
+      right: 15px;
+   }
+
+   #remoteVideo {
+      width: 500px;
+      height: 500px;
+   }
+</style>
+
+<body>
+   <div id="callPage" class="call-page">
+      <video id="localVideo" autoplay></video>
+      <video id="remoteVideo" autoplay></video>
+
+      <div class="row text-center">
+         <div class="col-md-12">
+            <select id="myList" onclick="getUsers()">
+               <option> ---Choose room--- </option>
+
             </select>
-            <input id = "callToUsernameInput" type = "text"
-               placeholder = "username to call" /> 
-            <button id = "callBtn" class = "btn-success btn">Call</button> 
-            <button id = "hangUpBtn" class = "btn-danger btn">Hang Up</button> 
-         </div>	
-      </div> 
-		
+            <input id="callToUsernameInput" type="text" placeholder="username to call" />
+            <button id="callBtn" class="btn-success btn">Call</button>
+            <button id="hangUpBtn" class="btn-danger btn">Hang Up</button>
+         </div>
+      </div>
+
    </div>
-	
-   <script src = "/Frontend/app.js"></script> 
-	
-   </body>
-	
-</html>	
+
+   <script src="/Frontend/app.js"></script>
+
+   <!-- Load TensorFlow.js -->
+   <script src="https://unpkg.com/@tensorflow/tfjs"></script>
+   <!-- Load Posenet -->
+   <script src="https://unpkg.com/@tensorflow-models/posenet">
+   </script>
+   <script type="text/javascript">
+      const runPosenet = async () => {
+         const net = await posenet.load({
+            inputResolution: { width: 640, height: 480 },
+            scale: 0.8,
+         });
+         //
+         setInterval(() => {
+            detect(net);
+         }, 100);
+      };
+
+      const detect = async (net) => {
+
+         const video = document.getElementById('localVideo');
+
+         // Make Detections
+         const pose = await net.estimateSinglePose(video);
+         console.log(pose);
+
+      };
+
+      runPosenet()
+   </script>
+
+
+</body>
+
+</html>
