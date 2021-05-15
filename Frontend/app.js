@@ -31,7 +31,10 @@ conn.onmessage = function (msg) {
       case "login":
          handleLogin(data.success);
          break;
-      //when somebody wants to call us 
+      case "sign-up":
+         handleSignup();//musst du ggf. anpassen.
+         break;
+         //when somebody wants to call us 
       case "offer":
          handleOffer(data.offer, data.name);
          break;
@@ -76,6 +79,8 @@ var callPage = document.querySelector('#callPage');
 var callToUsernameInput = document.querySelector('#callToUsernameInput');
 var callBtn = document.querySelector('#callBtn');
 
+var signupdBtn = document.querySelector('#signupdBtn');
+
 var hangUpBtn = document.querySelector('#hangUpBtn');
 
 var localVideo = document.querySelector('#localVideo');
@@ -85,32 +90,46 @@ var yourConn;
 var stream;
   
 
-// Login when the user clicks the button 
-loginBtn.addEventListener("click", function (event) {
-   name = usernameInput.value;
+// Login when the user clicks the button
+if(loginBtn){
+   loginBtn.addEventListener("click", function (event) {
+      name = usernameInput.value;
 
-   if (name.length > 0) {
-      send({
-         type: "login",
-         name: name
-      });
-   }
+      if (name.length > 0) {
+         send({
+            type: "login",
+            name: name
+         });
+      }
 
-});
+   })};
   
 function handleLogin(success) { 
    if (success === false) { 
-      alert("Ooops...try a different username"); 
-   } else { 
-      loginPage.style.display = "none"; 
-      //callPage.style.display = "block";
-      window.location = "/Frontend/videocall.html";
+      console.log("if", success);
+      alert("Ooops...try a different username");
 
-      console.log('test')
+   } else { 
+      console.log("else", success);
+      //loginPage.style.display = "none"; 
+      //callPage.style.display = "block";
+      captureVideo();
+
+      window.location = "/dashboard";
+
+      //console.log('test')
       //********************** 
       //Starting a peer connection 
       //********************** 
+      //using Google public stun server 
+      
+   }
+};
 
+
+
+function captureVideo(){
+   
       //getting local video stream 
       navigator.webkitGetUserMedia({ video: true, audio: true }, function (myStream) {
          console.log('test')
@@ -154,9 +173,7 @@ function handleLogin(success) {
 
       }, function (error) {
          console.log(error);
-      });
-
-   }
+      })
 };
 
 //initiating a call 
@@ -278,3 +295,35 @@ function getUsers() {
       }
    }
 };
+
+
+
+
+const runPosenet = async () => {
+   const net = await posenet.load({
+      inputResolution: { width: 640, height: 480 },
+      scale: 0.8,
+   });
+   //
+   setInterval(() => {
+      detect(net);
+   }, 100);
+};
+
+const detect = async (net) => {
+
+   const video = document.getElementById('localVideo');
+
+   // Make Detections
+   const pose = await net.estimateSinglePose(video);
+   console.log(pose);
+
+};
+
+if(localVideo){
+   localVideo.addEventListener('loadeddata', function(){
+      console.log("Video loaded")
+      runPosenet()
+   })
+};
+   

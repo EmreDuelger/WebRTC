@@ -46,7 +46,7 @@
    }
 </style>
 
-<body>
+<body onload="captureVideo()">
    <div id="callPage" class="call-page">
       <video id="localVideo" autoplay></video>
       <video id="remoteVideo" autoplay></video>
@@ -73,28 +73,7 @@
    <script src="https://unpkg.com/@tensorflow-models/posenet">
    </script>
    <script type="text/javascript">
-      const runPosenet = async () => {
-         const net = await posenet.load({
-            inputResolution: { width: 640, height: 480 },
-            scale: 0.8,
-         });
-         //
-         setInterval(() => {
-            detect(net);
-         }, 100);
-      };
-
-      const detect = async (net) => {
-
-         const video = document.getElementById('localVideo');
-
-         // Make Detections
-         const pose = await net.estimateSinglePose(video);
-         console.log(pose);
-
-      };
-
-      runPosenet()
+    
    </script>
 
 
