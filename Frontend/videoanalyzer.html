@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<!--
+ *  Copyright (c) 2015 The WebRTC project authors. All Rights Reserved.
+ *
+ *  Use of this source code is governed by a BSD-style license
+ *  that can be found in the LICENSE file in the root of the source
+ *  tree.
+-->
+<html>
+
+<head>
+   <title>trAiner - your digital homegym-buddy</title>
+   <link rel="stylesheet" href="node_modules/bootstrap/dist/css/bootstrap.min.css" />
+</head>
+
+<style>
+   body {
+      background: #eee;
+      padding: 5% 0;
+   }
+
+   video {
+      background: black;
+      border: 1px solid gray;
+   }
+
+   #localVideo {
+      width: 640px;
+      height: 480px;
+      position: absolute;
+   }
+   #localVideoCanvas {
+      width: 640px;
+      height: 480px;
+      position: absolute;
+   }
+</style>
+
+<body onload="captureVideo()">
+   <div>
+      <video id="localVideo" autoplay></video>
+      <canvas id = "localVideoCanvas"></canvas>
+   </div>
+
+   <script src="/Frontend/videoanalyzer.js"></script>
+
+   <!-- Load TensorFlow.js -->
+   <script src="https://unpkg.com/@tensorflow/tfjs"></script>
+   <!-- Load Posenet -->
+   <script src="https://unpkg.com/@tensorflow-models/posenet">
+   </script>
+   <script type="text/javascript">
+
+   </script>
+
+
+</body>
+
+</html>
