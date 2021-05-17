@@ -6,12 +6,16 @@
  *  tree.
  */
 'use strict';
+
+
+
 //const { response } = require("express");
 
 //const {data} = require("jquery");
 
 //our username 
 var name;
+var password;
 var connectedUser;
 
 //connecting to our signaling server
@@ -28,7 +32,7 @@ conn.onmessage = function (msg) {
    var data = JSON.parse(msg.data);
 
    switch (data.type) {
-      case "login":
+      case "call":
          handleLogin(data.success);
          break;
       case "sign-up":
@@ -73,6 +77,7 @@ function send(message) {
 
 var loginPage = document.querySelector('#loginPage');
 var usernameInput = document.querySelector('#usernameInput');
+var userpasswordInput = document.querySelector('#userpasswordInput');
 var loginBtn = document.querySelector('#loginBtn');
 
 var callPage = document.querySelector('#callPage');
@@ -91,20 +96,36 @@ var stream;
   
 
 // Login when the user clicks the button
-if(loginBtn){
+/*if(loginBtn){
    loginBtn.addEventListener("click", function (event) {
+      console.log("clicked!");
       name = usernameInput.value;
+      password = userpasswordInput.value;
+      console.log(name);
+      console.log(password);
+      if (name.length > 0 && password.length > 0) {
+         const Data= {"username": name, "password": password}
+         const otheparam ={
+         headers: {
+            "content-type":"application/json; charset=UTF-8"
+         },
+         body:Data,
+         method:"POST"   
+     };
+         console.log(otheparam.body);
+         fetch("http://localhost:8080/auth", otheparam)
+         .then(data=>{console.log(data.data)})
+         .then(res=>{console.log(res)})
+         //$.post("/auth", {"username": name, "password": password});
+         console.log("Name and password are correct.")
+      } else {
+         alert("Ooops...Please enter account and password or sign-up!");
 
-      if (name.length > 0) {
-         send({
-            type: "login",
-            name: name
-         });
       }
 
-   })};
+   })};*/
   
-function handleLogin(success) { 
+/*function handleLogin(success) { 
    if (success === false) { 
       console.log("if", success);
       alert("Ooops...try a different username");
@@ -124,12 +145,19 @@ function handleLogin(success) {
       //using Google public stun server 
       
    }
-};
+};*/
 
 
 
 function captureVideo(){
    
+
+   
+   if (success === false) { 
+      console.log("if", success);
+      alert("Login failed");
+
+   }
       //getting local video stream 
       navigator.webkitGetUserMedia({ video: true, audio: true }, function (myStream) {
          console.log('test')
@@ -246,9 +274,9 @@ function handleLeave() {
    remoteVideo.srcObject = null;
 
 
-   //yourConn.close(); 
-   // yourConn.onicecandidate = null; 
-   // yourConn.onaddstream = null;
+   yourConn.close(); 
+   yourConn.onicecandidate = null; 
+   yourConn.onaddstream = null;
 };
 
 var firstclick = 0;

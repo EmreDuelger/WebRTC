@@ -1,0 +1,45 @@
+[
+
+    {   
+        "account": "Emre",
+        "password": "beispiel",
+        "name":"Emre",
+        "surname":"Dülger",
+        "age":26,
+        "session":{},
+        "buddies":[ "Hendrik", "Andre", "Rodion" ]
+
+    },
+
+    {   
+        "account": "Hendrik",
+        "password": "beispiel",
+        "name":"Hendrik",
+        "surname":"Schulze Brandhoff",
+        "age":25,
+        "session":{},
+        "buddies":[ "Emre", "Andre", "Rodion" ]
+
+    },
+
+    {   
+        "account": "Andre",
+        "password": "beispiel",
+        "name":"Andre",
+        "surname":"Tegeder",
+        "age":30,
+        "session":{},
+        "buddies":[ "Emre", "Hendrik", "Rodion" ]
+
+    },
+    {   
+        "account": "Rodion",
+        "password": "beispiel",
+        "name":"Rodion",
+        "surname":"Meyer",
+        "age":35,
+        "session":{},
+        "buddies":[ "Emre", "Hendrik", "Andre" ]
+
+    }
+]
