@@ -8,6 +8,8 @@ var wss = new WebSocketServer({port: 9090});
 const express = require("express");
 const app = express();
 
+const session = require("express-session");
+
 const http = require("http");
 const server = http.createServer(app, wss);
 
@@ -25,49 +27,16 @@ var url = "mongodb://localhost:27017";
 // A Client to MongoDB
 var MongoClient = require('mongodb').MongoClient;
 
-// Make a connection to MongoDB Service
-/*MongoClient.connect(url, function(err, db) {
-   if (err) throw err;
-   console.log("Connected to MongoDB!");
-
-   console.log(db.databaseName);
- });*/
-
+//MongoDB-Connection
 const client = new MongoClient(url, { useUnifiedTopology: true }); // useUnifiedTopology removes a warning
 
-// Connect
-/*client
-  .connect()
-  .then(client =>
-    client
-      .db()
-      .admin()
-      .listDatabases() // Returns a promise that will resolve to the list of databases
-  )
-  .then(dbs => {
-    //console.log("Mongo databases", dbs);
-    list = dbs.databases;
-    for(db in list){
-       test = list[db];
-       console.log(test['name']);
-       trainer = stringify( test['name']);
-         if(trainer === 'trainer'){
-//console.log('trainer');
+var db;
 
-         }
-
-            
-            
-    }
-    
-  })
-  .finally(() => client.close()); // Closing after getting the data
-*/
 MongoClient.connect(url, { useNewUrlParser: true }, (err, client) => {
 
    if (err) throw err;
 
-   const db = client.db("trainer");
+   db = client.db("trainer");
 
    db.listCollections().toArray().then((docs) => {
 
@@ -83,11 +52,14 @@ MongoClient.connect(url, { useNewUrlParser: true }, (err, client) => {
   // });
 });
 
+app.set("view engine", "ejs");
 
 // use express static to deliver resources HTML, CSS, JS, etc)
 // from the public folder
 
 app.use(express.static(__dirname));
+
+app.use(express.static(path.join(__dirname, "public")));
 
 // Provide access to node_modules folder from the client-side
 
@@ -96,7 +68,8 @@ app.use('/scripts', express.static(`${__dirname}/node_modules/`));
 // Redirect all traffic to index.html
 
 app.get("/home", function(req, res){
-   res.sendFile(`${__dirname}/Frontend/login.html`);
+   //res.sendFile(`${__dirname}/Frontend/login.html`);
+   res.render("login"); // index refers to index.ejs
 });
 
 app.get("/dashboard", function(req, res){
@@ -126,11 +99,60 @@ app.post('/signup', function(req, res)
 {
 //andre
 });
+//Sessions
 
-app.post('/auth', function(req, res)
-{
-//emre
+app.use(session({
+	secret: 'secret',
+	resave: true,
+	saveUninitialized: true
+}));
+app.use(bodyParser.urlencoded({extended : false}));
+//app.use(bodyParser.json());
+
+app.post('/auth', function(request, response) {
+   console.log("start auth!")
+   console.log(request.body.name);
+   console.log(request.body.password);
+	var username = request.body.name;
+	var password = request.body.password;
+
+   
+   console.log(username, password);
+	if (username && password) {
+      console.log("start DB-Query!");
+      MongoClient.connect(url, { useNewUrlParser: true }, (err, client) => {
+
+         if (err) throw err;
+         db = client.db("trainer");
+         db.collection("user").find({account:username, password:password}).toArray().then(json => {
+
+            if (json.length > 0) {
+               console.log(json[0].account);
+               request.session.loggedin = true;
+               request.session.username = username;
+               console.log(request.session); // variable mit Session
+               //response.send({explanation: "Correct Username and Password!", 
+               //success: false });
+               response.redirect('/dashboard');
+               response
+            } else {
+				response.render("failure");
+            }			
+            response.end();
+         });
+      });
+      
+	}
+   else {
+		response.send({success: false});
+		response.end();
+   };
 });
+
+
+
+
+
 
 //all connected to the server users 
 var users = {};
@@ -157,13 +179,13 @@ wss.on('connection', function(connection) {
       //switching type of the user message 
       switch (data.type) { 
          //when a user tries to login
-         case "login": 
-            console.log("User logged", data.name); 
+         case "call": 
+            console.log("User logged in", data.name); 
 				
             //if anyone is logged in with this username then refuse 
             if(users[data.name]) { 
                sendTo(connection, { 
-                  type: "login", 
+                  type: "call", 
                   success: false 
                }); 
             } else { 
