@@ -266,6 +266,10 @@ app.get("/videocall", function(req, res){
 });
 });
 
+app.get("/videoanalyzer", function(req, res){
+   res.sendFile(`${__dirname}/Frontend/videoanalyzer.html`);
+});
+
 
 app.get('/users', function(req, res){
 
