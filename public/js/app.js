@@ -14,7 +14,7 @@
 //const {data} = require("jquery");
 
 //our username 
-var name;
+//var name = username;
 var password;
 var connectedUser;
 
@@ -32,9 +32,9 @@ conn.onmessage = function (msg) {
    var data = JSON.parse(msg.data);
 
    switch (data.type) {
-      case "call":
-         handleLogin(data.success);
-         break;
+      //case "call":
+        // handleLogin(data.success);
+        // break;
       case "sign-up":
          handleSignup();//musst du ggf. anpassen.
          break;
@@ -133,10 +133,11 @@ var stream;
    } else { 
       console.log("else", success);
       //loginPage.style.display = "none"; 
+      alert("Websocket-Connection established!");
       //callPage.style.display = "block";
-      captureVideo();
+      //captureVideo();
 
-      window.location = "/dashboard";
+     // window.location = "/dashboard";
 
       //console.log('test')
       //********************** 
@@ -153,14 +154,23 @@ function captureVideo(){
    
 
    
-   if (success === false) { 
-      console.log("if", success);
-      alert("Login failed");
+  // if (success === false) { 
+   //  console.log("if", success);
+     // alert("Login failed");
 
-   }
+   //}
+      
+      
+      //send({ 
+          //  type: "call", 
+           // name: name 
+     //  }); 
+      
+	
       //getting local video stream 
-      navigator.webkitGetUserMedia({ video: true, audio: true }, function (myStream) {
-         console.log('test')
+         navigator.webkitGetUserMedia({ video: true, audio: true }, function (myStream) {
+         
+         console.log('STARTING LOCALVIDEO')
          stream = myStream;
 
          const videoTracks = stream.getVideoTracks();

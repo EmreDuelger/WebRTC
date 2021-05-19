@@ -16,6 +16,12 @@ const server = http.createServer(app, wss);
 var bodyParser = require('body-parser');
 var path = require('path');
 
+var MongoDBStore = require('connect-mongodb-session')(session);
+var store = new MongoDBStore({
+   uri: 'mongodb://localhost:27017/trainer',
+   collection: 'sessions'
+ });
+
 server.listen( listening_to_port, () => {
   console.log(`server started on http://localhost:${listening_to_port}`);
 });
@@ -31,6 +37,9 @@ var MongoClient = require('mongodb').MongoClient;
 const client = new MongoClient(url, { useUnifiedTopology: true }); // useUnifiedTopology removes a warning
 
 var db;
+
+//all connected to the server users 
+var users = {};
 
 MongoClient.connect(url, { useNewUrlParser: true }, (err, client) => {
 
@@ -51,6 +60,14 @@ MongoClient.connect(url, { useNewUrlParser: true }, (err, client) => {
   //     client.close();
   // });
 });
+
+//Session Storing
+app.use(session({
+	secret: 'secret',
+   store: store,
+	resave: true,
+	saveUninitialized: true
+}));
 
 app.set("view engine", "ejs");
 
@@ -73,11 +90,180 @@ app.get("/home", function(req, res){
 });
 
 app.get("/dashboard", function(req, res){
-   res.sendFile(`${__dirname}/Frontend/dashboard/dashboard.html`);
+   //res.sendFile(`${__dirname}/Frontend/dashboard/dashboard.html`);
+   res.render("dashboard", {
+      "username": req.session.username
+   });
 });
 
 app.get("/videocall", function(req, res){
-   res.sendFile(`${__dirname}/Frontend/videocall.html`);
+   //res.sendFile(`${__dirname}/Frontend/videocall.html`);
+
+  
+   res.render("videocall", {
+      "username": req.session.username
+   });
+
+   
+//   var obj = users;
+  // var keys = Object.keys(users);
+	//console.log(keys);
+   
+   wss.on('connection', function(connection) {
+      console.log("User logged in", req.session.username); 
+               
+               //if anyone is logged in with this username then refuse 
+               if(users[req.session.username]) { 
+                  sendTo(connection, { 
+                     type: "call", 
+                     success: false 
+                  }); 
+               } else { 
+                  //save user connection on the server 
+                  users[req.session.username] = connection; 
+                  connection.name = req.session.username; 
+                  console.log(req.session.username);
+                  console.log(users);
+                  sendTo(connection, { 
+                     type: "call", 
+                     success: true 
+                  }); 
+               }
+               connection.send('Hello World!!!');
+
+               connection.on('message', function(message) { 
+	
+                  var data; 
+                  
+                  //accepting only JSON messages 
+                  try { 
+                     data = JSON.parse(message);
+                     //console.log(users);
+                  } catch (e) { 
+                     console.log("Invalid JSON"); 
+                     data = {}; 
+                  }
+                  
+                  //switching type of the user message 
+                  switch (data.type) { 
+                     //when a user tries to login
+                    /* case "call": 
+                        //console.log("User logged in", session.username); 
+                        
+                        //if anyone is logged in with this username then refuse 
+                       / if(users[session.username]) { 
+                           sendTo(connection, { 
+                              type: "call", 
+                              success: false 
+                           }); 
+                        } else { 
+                           //save user connection on the server 
+                           users[session.username] = connection; 
+                           connection.name = session.username; 
+                           console.log(session.username);
+                           sendTo(connection, { 
+                              type: "call", 
+                              success: true 
+                           }); 
+                        } 
+                        
+                        break;
+                        */
+                     case "offer": 
+                        //for ex. UserA wants to call UserB 
+                        console.log("Sending offer to: ", data.name);
+                        
+                        //if UserB exists then send him offer details 
+                        var conn = users[data.name]; 
+                        
+                        if(conn != null) { 
+                           //setting that UserA connected with UserB 
+                           connection.otherName = data.name; 
+                           
+                           sendTo(conn, { 
+                              type: "offer", 
+                              offer: data.offer, 
+                              name: connection.name 
+                           }); 
+                        }
+                        
+                        break;
+                        
+                     case "answer": 
+                        console.log("Sending answer to: ", data.name); 
+                        //for ex. UserB answers UserA 
+                        var conn = users[data.name]; 
+                        
+                        if(conn != null) { 
+                           connection.otherName = data.name; 
+                           sendTo(conn, { 
+                              type: "answer", 
+                              answer: data.answer 
+                           }); 
+                        } 
+                        
+                        break; 
+                        
+                     case "candidate": 
+                        console.log("Sending candidate to:",data.name); 
+                        var conn = users[data.name];
+                        
+                        if(conn != null) { 
+                           sendTo(conn, { 
+                              type: "candidate", 
+                              candidate: data.candidate 
+                           }); 
+                        } 
+                        
+                        break;
+                        
+                     case "leave": 
+                        console.log("Disconnecting from", data.name); 
+                        var conn = users[data.name]; 
+                        conn.otherName = null; 
+                        
+                        //notify the other user so he can disconnect his peer connection 
+                        if(conn != null) {
+                           sendTo(conn, { 
+                              type: "leave" 
+                          }); 
+                        }
+                        
+                        break;
+                        
+                     default: 
+                        sendTo(connection, { 
+                           type: "error", 
+                           message: "Command not found: " + data.type 
+                        }); 
+                        
+                        break; 
+                  }
+                  
+               }); 
+               
+               //when user exits, for example closes a browser window 
+               //this may help if we are still in "offer","answer" or "candidate" state 
+               connection.on("close", function() { 
+               
+                  if(connection.name) { 
+                     delete users[connection.name]; 
+                     
+                     if(connection.otherName) { 
+                        console.log("Disconnecting from ", connection.otherName); 
+                        var conn = users[connection.otherName]; 
+                        conn.otherName = null;
+                        
+                        if(conn != null) { 
+                           sendTo(conn, { 
+                              type: "leave" 
+                           }); 
+                        }
+                     } 
+                  }
+                  
+               });
+});
 });
 
 
@@ -97,11 +283,7 @@ app.post('/signup', function(req, res)
 });
 //Sessions
 
-app.use(session({
-	secret: 'secret',
-	resave: true,
-	saveUninitialized: true
-}));
+
 app.use(bodyParser.urlencoded({extended : false}));
 //app.use(bodyParser.json());
 
@@ -143,23 +325,18 @@ app.post('/auth', function(request, response) {
       
 	}
    else {
-		response.send({success: false});
+		response.render("failure");
 		response.end();
    };
 });
 
 
 
-
-
-
-//all connected to the server users 
-var users = {};
   
 //when a user connects to our server Websocket-Connecting
-wss.on('connection', function(connection) {
+/*wss.on('connection', function(connection) {
   
-   console.log("User connected");
+   console.log("User connected", connection);
 	
    //when server gets a message from a connected user 
    connection.on('message', function(message) { 
@@ -178,22 +355,22 @@ wss.on('connection', function(connection) {
       //switching type of the user message 
       switch (data.type) { 
          //when a user tries to login
-         case "call": 
-            console.log("User logged in", data.name); 
+        /* case "call": 
+            //console.log("User logged in", session.username); 
 				
             //if anyone is logged in with this username then refuse 
-            if(users[data.name]) { 
+           / if(users[session.username]) { 
                sendTo(connection, { 
                   type: "call", 
                   success: false 
                }); 
             } else { 
                //save user connection on the server 
-               users[data.name] = connection; 
-               connection.name = data.name; 
-					console.log(connection.name);
+               users[session.username] = connection; 
+               connection.name = session.username; 
+					console.log(session.username);
                sendTo(connection, { 
-                  type: "login", 
+                  type: "call", 
                   success: true 
                }); 
             } 
@@ -278,7 +455,7 @@ wss.on('connection', function(connection) {
    connection.on("close", function() { 
 	
       if(connection.name) { 
-         //delete users[connection.name]; 
+         delete users[connection.name]; 
 			
          if(connection.otherName) { 
             console.log("Disconnecting from ", connection.otherName); 
@@ -298,9 +475,9 @@ wss.on('connection', function(connection) {
   // var keys = Object.keys(users);
 	//console.log(keys);
    connection.send('Hello World!!!');  
-});
+})*/
   
 function sendTo(connection, message) { 
    connection.send(JSON.stringify(message)); 
-}
+};
 
