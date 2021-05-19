@@ -129,8 +129,11 @@ app.post('/auth', function(request, response) {
                console.log(request.session); // variable mit Session
                //response.send({explanation: "Correct Username and Password!", 
                //success: false });
-               response.redirect('/dashboard');
-               response
+               //response.redirect('/dashboard');// für die normale html-Seite
+
+               response.render("dashboard", {
+                  "username": username
+               });
             } else {
 				response.render("failure");
             }			
