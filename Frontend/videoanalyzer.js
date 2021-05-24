@@ -13,8 +13,8 @@ var localVideoCanvas = document.querySelector('#localVideoCanvas');
 
 var stream;
 
-var videoheight = 480;
-var videowidth = 640;
+var videoheight = 640;
+var videowidth = 360;
 
 var poseconfidence = 0.3;
 var partconfidence = 0.3;
@@ -33,19 +33,19 @@ var videotype = "webcam";
 const speed = {
    architecture: 'MobileNetV1',
    outputStride: 16,
-   inputResolution: { width: videowidth, height: videoheight },
+   inputResolution: 200,
    multiplier: 0.5
 };
 const mixed = {
    architecture: 'MobileNetV1',
    outputStride: 16,
-   inputResolution: { width: videowidth, height: videoheight },
+   inputResolution: 500,
    multiplier: 0.75
 };
 const accuracy = {
    architecture: 'ResNet50',
    outputStride: 32,
-   inputResolution: { width: videowidth, height: videoheight },
+   inputResolution: 500,
    quantBytes: 2
 };
 
@@ -224,8 +224,6 @@ function changeVideotypeSelector(type) {
          document.getElementById("fileselector").style.display = 'block';
          document.getElementById("playbutton").style.display = 'block';
          document.getElementById("downloadbutton").style.display = 'block';
-         fileVideo.height = videoheight;
-         fileVideo.width = videowidth;
 
          break;
       default:
@@ -246,6 +244,8 @@ function playSelectedFile(file) {
 
    var fileURL = URL.createObjectURL(file);
    fileVideo.src = fileURL;
+   fileVideo.height = videoheight;
+   fileVideo.width = videowidth;
    poses = new Array();
    document.getElementById("downloadbutton").textContent = 'Download ' + poses.length + ' Poses (JSON)';
 }
