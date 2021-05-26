@@ -14,7 +14,7 @@ var localVideoCanvas = document.querySelector('#localVideoCanvas');
 var stream;
 
 var videoheight = 640;
-var videowidth = 360;
+var videowidth = 853;
 
 var poseconfidence = 0.3;
 var partconfidence = 0.3;

@@ -96,6 +96,12 @@ app.get("/dashboard", function(req, res){
    });
 });
 
+app.get("/videoanalyzer", function(req, res){
+   res.render("videoanalyzer", {
+      "username": req.session.username
+   });
+});
+
 app.get("/videocall", function(req, res){
    //res.sendFile(`${__dirname}/Frontend/videocall.html`);
 
@@ -264,10 +270,6 @@ app.get("/videocall", function(req, res){
                   
                });
 });
-});
-
-app.get("/videoanalyzer", function(req, res){
-   res.sendFile(`${__dirname}/Frontend/videoanalyzer.html`);
 });
 
 
