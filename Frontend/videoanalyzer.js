@@ -19,6 +19,7 @@ var videowidth = 640;
 var poseconfidence = 0.3;
 var partconfidence = 0.3;
 var poses = new Array();
+document.getElementById("downloadbutton").textContent = 'Download ' + poses.length + ' Poses (JSON)';
 
 const color = "aqua";
 const boundingBoxColor = "red";
@@ -154,9 +155,9 @@ function detectPose() {
                var pose = await net.estimateSinglePose(fileVideo);
                console.log(pose);
                drawCanvas(pose);
-               //Build a JSON array containing Customer records.
-
+               //Build a JSON array containing pose records.
                poses.push(pose);
+               document.getElementById("downloadbutton").textContent = 'Download ' + poses.length + ' Poses (JSON)';
             }
             break;
          default:
@@ -234,18 +235,19 @@ function changeVideotypeSelector(type) {
 }
 
 function playSelectedFile(file) {
-   var type = file.type
-   var canPlay = fileVideo.canPlayType(type)
-   if (canPlay === '') canPlay = 'no'
-   var message = 'Can play type "' + type + '": ' + canPlay
-   var isError = canPlay === 'no'
+   var type = file.type;
+   var canPlay = fileVideo.canPlayType(type);
+   if (canPlay === '') canPlay = 'no';
+   var message = 'Can play type "' + type + '": ' + canPlay;
+   var isError = canPlay === 'no';
    if (isError) {
-      return
+      return;
    }
 
-   var fileURL = URL.createObjectURL(file)
-   fileVideo.src = fileURL
+   var fileURL = URL.createObjectURL(file);
+   fileVideo.src = fileURL;
    poses = new Array();
+   document.getElementById("downloadbutton").textContent = 'Download ' + poses.length + ' Poses (JSON)';
 }
 
 function togglePlay() {

@@ -9,6 +9,7 @@ const express = require("express");
 const app = express();
 
 const session = require("express-session");
+const passport = require("passport");
 
 const http = require("http");
 const server = http.createServer(app, wss);
@@ -65,7 +66,7 @@ MongoClient.connect(url, { useNewUrlParser: true }, (err, client) => {
 app.use(session({
 	secret: 'secret',
    store: store,
-	resave: true,
+	resave: false,//vorher true
 	saveUninitialized: true
 }));
 
@@ -89,20 +90,42 @@ app.get("/home", function(req, res){
    res.render("login"); // index refers to index.ejs
 });
 
+
 app.get("/dashboard", function(req, res){
    //res.sendFile(`${__dirname}/Frontend/dashboard/dashboard.html`);
-   res.render("dashboard", {
-      "username": req.session.username
-   });
+   //console.log(req.session.cookie);
+   if(req.session.loggedin){
+      
+      
+       //console.log(req.session.cookie.expires);
+       res.render("dashboard", {
+         "username": req.session.username
+      });
+   }
+   else{
+      res.redirect("/home");
+   }
 });
+
+   //console.log(req.isAuthenticated);
+     
 
 app.get("/videocall", function(req, res){
    //res.sendFile(`${__dirname}/Frontend/videocall.html`);
 
-  
-   res.render("videocall", {
-      "username": req.session.username
-   });
+   if(req.session.loggedin){
+      
+      
+      //console.log(req.session.cookie.expires);
+      res.render("videocall", {
+         "username": req.session.username
+      });
+  }
+  else{
+
+   res.redirect("/home");
+  }
+   
 
    
 //   var obj = users;
@@ -267,7 +290,22 @@ app.get("/videocall", function(req, res){
 });
 
 app.get("/videoanalyzer", function(req, res){
-   res.sendFile(`${__dirname}/Frontend/videoanalyzer.html`);
+  
+  
+   if(req.session.loggedin){
+      
+      
+      //console.log(req.session.cookie.expires);
+      res.render("videoanalyzer", {
+         "username": req.session.username
+      });
+  }
+  else{
+
+   res.redirect("/home");
+  }
+  
+   
 });
 
 
@@ -283,13 +321,36 @@ app.get('/users', function(req, res){
 
 app.post('/signup', function(req, res)
 {
-//andre
+   if(req.session.loggedin){
+      
+      
+   //console.log(req.session.cookie.expires);
+   res.render("nameDerView", {
+      "username": req.session.username
+   });
+}
+else{
+
+   res.redirect("/home");
+}
 });
 //Sessions
 
 
 app.use(bodyParser.urlencoded({extended : false}));
 //app.use(bodyParser.json());
+
+// for Authentication
+/*passport.use(new LocalStrategy(
+   function(username, password, done) {
+     User.findOne({ username: username }, function (err, user) {
+       if (err) { return done(err); }
+       if (!user) { return done(null, false); }
+       if (!user.verifyPassword(password)) { return done(null, false); }
+       return done(null, user);
+     });
+   }
+ ));*/
 
 app.post('/auth', function(request, response) {
    console.log("start auth!")
@@ -309,17 +370,25 @@ app.post('/auth', function(request, response) {
          db.collection("user").find({account:username, password:password}).toArray().then(json => {
 
             if (json.length > 0) {
-               console.log(json[0].account);
+               console.log(json[0]);
                request.session.loggedin = true;
                request.session.username = username;
-               console.log(request.session); // variable mit Session
+               console.log(request.session.loggedin); // variable mit Session
+               //Angabe der Cookie-Dauer
+               var minutes = 10*60000;
+               request.session.cookie.expires = new Date(Date.now() + minutes)
+               request.session.cookie.maxAge = minutes;
+               //request.session.success = 'You are successfully registered and logged in ' + username + '!';
+               
                //response.send({explanation: "Correct Username and Password!", 
                //success: false });
                //response.redirect('/dashboard');// für die normale html-Seite
-
-               response.render("dashboard", {
-                  "username": username
-               });
+               //console.log(request.isAuthenticated());
+               //response.render("dashboard", {
+                  //"username": username
+              // });
+              response.redirect("/dashboard");
+                  
             } else {
 				response.render("failure");
             }			
