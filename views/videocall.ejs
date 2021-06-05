@@ -59,9 +59,14 @@
 
       <div class="row text-center">
          <div class="col-md-12">
-            <select id="myList" onclick="getUsers()">
+            <select id="myList">
                <option> ---Choose room--- </option>
-
+               <%for (var i=0; i<buddies.length;i++) {%>
+                  
+                  <option> <%=buddies[i]%></option>
+                  
+                      
+                  <%};%>
             </select>
             <input id="callToUsernameInput" type="text" placeholder="username to call" />
             <button id="callBtn" class="btn-success btn">Call</button>

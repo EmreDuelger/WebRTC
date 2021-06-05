@@ -66,7 +66,7 @@ MongoClient.connect(url, { useNewUrlParser: true }, (err, client) => {
 app.use(session({
 	secret: 'secret',
    store: store,
-	resave: false,//vorher true
+	resave: true,//vorher true
 	saveUninitialized: true
 }));
 
@@ -94,17 +94,28 @@ app.get("/home", function(req, res){
 app.get("/dashboard", function(req, res){
    //res.sendFile(`${__dirname}/Frontend/dashboard/dashboard.html`);
    //console.log(req.session.cookie);
-   if(req.session.loggedin){
+   if(req.session.loggedin)
+   {
       
-      
-       //console.log(req.session.cookie.expires);
-       res.render("dashboard", {
-         "username": req.session.username
-      });
+         console.log("start DB-Query!");
+         MongoClient.connect(url, { useNewUrlParser: true }, (err, client) => {
+   
+            if (err) throw err;
+            db = client.db("trainer");
+            db.collection("user").find({account:req.session.username}).toArray().then(json => {
+   
+               if (json.length > 0) {
+                  console.log(json[0].buddies)
+                  req.session.buddies=json[0].buddies;
+                   res.render("dashboard", {
+                  "buddies": json[0].buddies,
+                  "username": req.session.username
+                   });
+               }})})
    }
    else{
-      res.redirect("/home");
-   }
+            res.redirect("/home");
+         };
 });
 
    //console.log(req.isAuthenticated);
@@ -118,6 +129,7 @@ app.get("/videocall", function(req, res){
       
       //console.log(req.session.cookie.expires);
       res.render("videocall", {
+         "buddies": req.session.buddies,
          "username": req.session.username
       });
   }
