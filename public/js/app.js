@@ -33,12 +33,12 @@ conn.onmessage = function (msg) {
 
    switch (data.type) {
       //case "call":
-        // handleLogin(data.success);
-        // break;
+      // handleLogin(data.success);
+      // break;
       case "sign-up":
          handleSignup();//musst du ggf. anpassen.
          break;
-         //when somebody wants to call us 
+      //when somebody wants to call us 
       case "offer":
          handleOffer(data.offer, data.name);
          break;
@@ -93,7 +93,7 @@ var remoteVideo = document.querySelector('#remoteVideo');
 
 var yourConn;
 var stream;
-  
+
 
 // Login when the user clicks the button
 /*if(loginBtn){
@@ -124,7 +124,7 @@ var stream;
       }
 
    })};*/
-  
+
 /*function handleLogin(success) { 
    if (success === false) { 
       console.log("if", success);
@@ -150,95 +150,97 @@ var stream;
 
 
 
-function captureVideo(){
-   
+function captureVideo() {
 
-   
-  // if (success === false) { 
+
+
+   // if (success === false) { 
    //  console.log("if", success);
-     // alert("Login failed");
+   // alert("Login failed");
 
    //}
-      
-      
-      //send({ 
-          //  type: "call", 
-           // name: name 
-     //  }); 
-      
-	
-      //getting local video stream 
-         navigator.webkitGetUserMedia({ video: true, audio: true }, function (myStream) {
-         
-         console.log('STARTING LOCALVIDEO')
-         stream = myStream;
-
-         const videoTracks = stream.getVideoTracks();
-         window.stream = stream;
-         //displaying local video stream on the page 
-         localVideo.srcObject = stream;
 
 
-         
+   //send({ 
+   //  type: "call", 
+   // name: name 
+   //  }); 
 
-         //using Google public stun server 
-         var configuration = {
-            "iceServers": [{ "url": "stun:stun2.1.google.com:19302" }]
-         };
 
-         yourConn = new webkitRTCPeerConnection(configuration);
+   //getting local video stream 
+   navigator.webkitGetUserMedia({ video: true, audio: true }, function (myStream) {
 
-         // setup stream listening 
-         yourConn.addStream(stream);
+      console.log('STARTING LOCALVIDEO')
+      stream = myStream;
 
-         //when a remote user adds stream to the peer connection, we display it 
-         yourConn.onaddstream = function (e) {
+      const videoTracks = stream.getVideoTracks();
+      window.stream = stream;
+      //displaying local video stream on the page 
+      localVideo.srcObject = stream;
 
-            //displaying remote video stream on the page 
-            remoteVideo.srcObject = e.stream;
+      localVideo.height = 480;
+      localVideo.width = 640;
 
-         };
 
-         // Setup ice handling 
-         yourConn.onicecandidate = function (event) {
-            if (event.candidate) {
-               send({
-                  type: "candidate",
-                  candidate: event.candidate
-               });
-            }
-         };
+      //using Google public stun server 
+      var configuration = {
+         "iceServers": [{ "url": "stun:stun2.1.google.com:19302" }]
+      };
 
-      }, function (error) {
-         console.log(error);
-      })
+      yourConn = new webkitRTCPeerConnection(configuration);
+
+      // setup stream listening 
+      yourConn.addStream(stream);
+
+      //when a remote user adds stream to the peer connection, we display it 
+      yourConn.onaddstream = function (e) {
+
+         //displaying remote video stream on the page 
+         remoteVideo.srcObject = e.stream;
+
+      };
+
+      // Setup ice handling 
+      yourConn.onicecandidate = function (event) {
+         if (event.candidate) {
+            send({
+               type: "candidate",
+               candidate: event.candidate
+            });
+         }
+      };
+
+   }, function (error) {
+      console.log(error);
+   })
 };
 
 //initiating a call 
 
-if(callBtn){
-   callBtn.addEventListener("click", function () { 
+if (callBtn) {
+   callBtn.addEventListener("click", function () {
       var callToUsername = callToUsernameInput.value;
-      
-      if (callToUsername.length > 0) { 
-      
+
+      if (callToUsername.length > 0) {
+
          connectedUser = callToUsername;
-         
+
          // create an offer 
-         yourConn.createOffer(function (offer) { 
-            send({ 
-               type: "offer", 
-               offer: offer 
-            }); 
-            
-            yourConn.setLocalDescription(offer); 
-         }, function (error) { 
-            alert("Error when creating an offer"); 
+         yourConn.createOffer(function (offer) {
+            send({
+               type: "offer",
+               offer: offer
+            });
+
+            yourConn.setLocalDescription(offer);
+         }, function (error) {
+            alert("Error when creating an offer");
          });
-         
-      } 
-   })};
-  
+
+      }
+   })
+};
+
 //when somebody sends us an offer 
 function handleOffer(offer, name) {
    connectedUser = name;
@@ -267,25 +269,26 @@ function handleAnswer(answer) {
 function handleCandidate(candidate) {
    yourConn.addIceCandidate(new RTCIceCandidate(candidate));
 };
-   
-//hang up
-if(hangUpBtn){
-hangUpBtn.addEventListener("click", function () { 
 
-   send({ 
-      type: "leave" 
-   });  
-	
-   handleLeave(); 
-})};
-  
-function handleLeave() { 
-   connectedUser = null; 
+//hang up
+if (hangUpBtn) {
+   hangUpBtn.addEventListener("click", function () {
+
+      send({
+         type: "leave"
+      });
+
+      handleLeave();
+   })
+};
+
+function handleLeave() {
+   connectedUser = null;
    remoteVideo.srcObject = null;
 
 
-   yourConn.close(); 
-   yourConn.onicecandidate = null; 
+   yourConn.close();
+   yourConn.onicecandidate = null;
    yourConn.onaddstream = null;
 };
 
@@ -334,33 +337,59 @@ function getUsers() {
    }
 };
 
-const runPosenet = async () => {
-   const net = await posenet.load({
-      architecture: 'MobileNetV1',
-      outputStride: 16,
-      inputResolution: { width: 640, height: 480 },
-      multiplier: 0.5
-   });
-   //
-   setInterval(() => {
-      detect(net);
-   }, 100);
+var net = null;
+var modeltype = "speed";
+const speed = {
+   architecture: 'MobileNetV1',
+   outputStride: 32,
+   inputResolution: { width: 640, height: 480 },
+   multiplier: 0.5
+};
+const mixed = {
+   architecture: 'MobileNetV1',
+   outputStride: 16,
+   inputResolution: { width: 640, height: 480 },
+   multiplier: 0.75
+};
+const accuracy = {
+   architecture: 'ResNet50',
+   outputStride: 32,
+   inputResolution: { width: 640, height: 480 },
+   quantBytes: 2
 };
 
-const detect = async (net) => {
+function detectPose() {
+   async function poseDetectionFrame() {
 
-   const video = document.getElementById('localVideo');
+      var pose = await net.estimateSinglePose(localVideo);
+      console.log(pose);
 
-   // Make Detections
-   const pose = await net.estimateSinglePose(video);
-   console.log(pose);
+      requestAnimationFrame(poseDetectionFrame);
+   }
 
-};
+   poseDetectionFrame();
+}
 
-if(localVideo){
-   localVideo.addEventListener('loadeddata', function(){
+async function loadPosenet()  {
+   switch (modeltype) {
+      case 'speed':
+         net = await posenet.load(speed);
+         break;
+      case 'mixed':
+         net = await posenet.load(mixed);
+         break;
+      case 'accuracy':
+         net = await posenet.load(accuracy);
+         break;
+      default:
+         break;
+   }
+   detectPose();
+}
+
+if (localVideo) {
+   localVideo.addEventListener('loadeddata', function () {
       console.log("Video loaded")
-      runPosenet()
+      loadPosenet();
    })
 };
-   

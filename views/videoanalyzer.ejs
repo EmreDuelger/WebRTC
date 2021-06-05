@@ -24,52 +24,64 @@
       border: 1px solid gray;
    }
 
+   .container {
+      width: 360px;
+      height: 640px;
+      overflow: hidden;
+   }
+
    #fileVideo {
       position: absolute;
    }
 
    #localVideo {
-      width: 640px;
-      height: 480px;
+      width: 853px;
+      height: 640px;
+      object-fit: cover;
+      object-position: center;
+      margin-left: -247px;
       position: absolute;
    }
 
    #localVideoCanvas {
-      width: 640px;
-      height: 480px;
+      width: 853px;
+      height: 640px;
+      object-fit: cover;
+      object-position: center;
+      margin-left: -247px;
       position: absolute;
    }
 
    .slider {
-  -webkit-appearance: none;
-  width: 300px;
-  height: 25px;
-  background: #d3d3d3;
-  outline: none;
-  opacity: 0.7;
-  -webkit-transition: .2s;
-  transition: opacity .2s;
-}
+      -webkit-appearance: none;
+      width: 300px;
+      height: 25px;
+      background: #d3d3d3;
+      outline: none;
+      opacity: 0.7;
+      -webkit-transition: .2s;
+      transition: opacity .2s;
+   }
 
-.slider:hover {
-  opacity: 1;
-}
+   .slider:hover {
+      opacity: 1;
+   }
 
-.slider::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 25px;
-  height: 25px;
-  background: #04AA6D;
-  cursor: pointer;
-}
+   .slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 25px;
+      height: 25px;
+      background: #04AA6D;
+      cursor: pointer;
+   }
 
-.slider::-moz-range-thumb {
-  width: 25px;
-  height: 25px;
-  background: #04AA6D;
-  cursor: pointer;
-}
+   .slider::-moz-range-thumb {
+      width: 25px;
+      height: 25px;
+      background: #04AA6D;
+      cursor: pointer;
+   }
 </style>
 
 <body onload="bindPage()">
@@ -77,38 +89,42 @@
       <option value="webcam">Webcam</option>
       <option value="file">Local Video File</option>
    </select>
-   <input id="fileselector" type="file" accept="video/*" onchange="playSelectedFile(this.files[0])" style="display: none;" />
+   <input id="fileselector" type="file" accept="video/*" onchange="playSelectedFile(this.files[0])"
+      style="display: none;" />
    <select name="modeltype" id="modeltype" onchange="changeModelSelector(this.value)">
       <option value="speed">Speed (Low Accuracy / No-GPU / Mobile) [MobileNet 0.5 Mulitplier]</option>
       <option value="mixed">Mixed (Balanced Speed/Accuracy / Low-End GPU) [MobileNet 0.75 Mulitplier]</option>
       <option value="accuracy">Accuracy (Low Speed / High-End GPU) [ResNet]</option>
    </select>
    <div>
-      <input type="range" id="poseconfidence" name="poseconfidence"
-             min="0" max="1" value="0.3" step="0.02" class="slider" onchange="changePoseConfidence(this.value)">
+      <input type="range" id="poseconfidence" name="poseconfidence" min="0" max="1" value="0.3" step="0.02"
+         class="slider" onchange="changePoseConfidence(this.value)">
       <label for="poseconfidence">Pose-Confidence</label>
-    </div>
-    
-    <div>
-      <input type="range" id="partconfidence" name="partconfidence" 
-             min="0" max="1" value="0.3" step="0.02" class="slider" onchange="changePartConfidence(this.value)">
+   </div>
+
+   <div>
+      <input type="range" id="partconfidence" name="partconfidence" min="0" max="1" value="0.3" step="0.02"
+         class="slider" onchange="changePartConfidence(this.value)">
       <label for="partconfidence">Part-Confidence</label>
-    </div>
+   </div>
 
    <button id="playbutton" type="button" onclick="togglePlay()" style="display: none;">Play/Pause</button>
-   <button id="downloadbutton" type="button" onclick="DownloadJSON()" style="display: none;">Download 0 Poses (JSON)</button>
+   <button id="downloadbutton" type="button" onclick="DownloadJSON()" style="display: none;">Download 0 Poses
+      (JSON)</button>
 
    <div id="loading" style="display:flex;">
       Loading Model...
    </div>
    <div id="main" style="display:none;">
-      <video id="localVideo" autoplay></video>
-      <video id="fileVideo" style="display: none;"></video>
-      <canvas id="localVideoCanvas"></canvas>
+      <div class='container'>
+         <video id="localVideo" autoplay></video>
+         <video id="fileVideo" style="display: none;"></video>
+         <canvas id="localVideoCanvas"></canvas>
+      </div>
    </div>
 
 
-   <script src="/Frontend/videoanalyzer.js"></script>
+   <script src="/js/videoanalyzer.js"></script>
    <script src="https://unpkg.com/@tensorflow/tfjs"></script>
    <script src="https://unpkg.com/@tensorflow-models/posenet"></script>
 

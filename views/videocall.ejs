@@ -19,39 +19,43 @@
       padding: 5% 0;
    }
 
+   #video-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, 360px);
+      grid-auto-rows: 360px;
+   }
+
    video {
       background: black;
       border: 1px solid gray;
-   }
-
-   .call-page {
-      position: relative;
-      display: block;
-      margin: 0 auto;
-      width: 500px;
-      height: 500px;
+      object-fit: cover;
+      object-position: center;
    }
 
    #localVideo {
-      width: 150px;
-      height: 150px;
-      position: absolute;
-      top: 60px;
-      right: 5px;
+      width: 360px;
+      height: 640px;
+      position: relative;
    }
 
    #remoteVideo {
-      width: 500px;
-      height: 500px;
+      width: 360px;
+      height: 640px;
    }
 </style>
 
 <body onload="captureVideo()">
-  
-   <div id="callPage" class="call-page">
-      <H1>hello <%=username%>!</H1>
-      <video id="localVideo" autoplay></video>
-      <video id="remoteVideo" autoplay></video>
+   <div id="video-grid">
+      <div>
+         <video id="localVideo" autoplay></video>
+         <H1>
+            <%=username%>
+         </H1>
+      </div>
+      <div>
+         <video id="remoteVideo" autoplay></video>
+         <H1>Guest</H1>
+      </div>
 
       <div class="row text-center">
          <div class="col-md-12">
@@ -75,7 +79,7 @@
    <script src="https://unpkg.com/@tensorflow-models/posenet">
    </script>
    <script type="text/javascript">
-    
+
    </script>
 
 
