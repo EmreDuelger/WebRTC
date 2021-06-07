@@ -87,7 +87,7 @@ app.use('/scripts', express.static(`${__dirname}/node_modules/`));
 
 app.get("/home", function(req, res){
    //res.sendFile(`${__dirname}/Frontend/login.html`);
-   res.render("login"); // index refers to index.ejs
+   res.render("signup"); // index refers to index.ejs
 });
 
 
@@ -333,18 +333,24 @@ app.get('/users', function(req, res){
 
 app.post('/signup', function(req, res)
 {
-   if(req.session.loggedin){
-      
-      
-   //console.log(req.session.cookie.expires);
-   res.render("nameDerView", {
-      "username": req.session.username
-   });
-}
-else{
+   console.log("start DB-Query!");
+   MongoClient.connect(url, { useNewUrlParser: true }, (err, client) => {
 
-   res.redirect("/home");
-}
+      if (err) throw err;
+      db = client.db("trainer");
+      db.collection("user").find({account:req.session.username}).toArray().then(json => {
+
+         if (json.length > 0) {
+            console.log(json[0].buddies)
+            req.session.buddies=json[0].buddies;
+             res.render("dashboard", {
+            "buddies": json[0].buddies,
+            "username": req.session.username
+             });
+         }else{
+            //WENNN User nicht vorhanden
+            // Datenbank Insert MongoDB
+         }})})
 });
 //Sessions
 
