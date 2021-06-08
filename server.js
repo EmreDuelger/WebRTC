@@ -331,26 +331,27 @@ app.get('/users', function(req, res){
 });
 
 
-app.post('/signup', function(req, res)
+app.post('/signup', function(request, response)
 {
-   console.log("start DB-Query!");
+   console.log("start signup!")
+   console.log(request.body.name);
+   console.log(request.body.password);
+
+
+   console.log("Create new Account");
    MongoClient.connect(url, { useNewUrlParser: true }, (err, client) => {
 
       if (err) throw err;
       db = client.db("trainer");
-      db.collection("user").find({account:req.session.username}).toArray().then(json => {
+      var myobj = { account: "TEST", password: "test", name: "Test_Name", surname: "Test_Surname", age: "22" };
+      db.collection("user").insertOne(myobj, function (err, res) {
+         if (err) throw err;
+         console.log("User added"); 
+         response.render("signup_ok");
+      }
+      )})
 
-         if (json.length > 0) {
-            console.log(json[0].buddies)
-            req.session.buddies=json[0].buddies;
-             res.render("dashboard", {
-            "buddies": json[0].buddies,
-            "username": req.session.username
-             });
-         }else{
-            //WENNN User nicht vorhanden
-            // Datenbank Insert MongoDB
-         }})})
+
 });
 //Sessions
 
