@@ -334,8 +334,7 @@ app.get('/users', function(req, res){
 app.post('/signup', function(request, response)
 {
    console.log("start signup!")
-   console.log(request.body.name);
-   console.log(request.body.password);
+   //console.log(request.body.name);
 
 
    console.log("Create new Account");
