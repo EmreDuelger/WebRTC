@@ -80,6 +80,7 @@ app.use(express.static(__dirname));
 app.use(express.static(path.join(__dirname, "public")));
 
 // Provide access to node_modules folder from the client-side
+app.use(bodyParser.urlencoded({extended : false}));
 
 app.use('/scripts', express.static(`${__dirname}/node_modules/`));
 
@@ -331,31 +332,44 @@ app.get('/users', function(req, res){
 });
 
 
-app.post('/signup', function(request, response)
-{
+app.post('/signup', function (request, response) {
    console.log("start signup!")
-   //console.log(request.body.name);
+   //console.log(request);
+   console.log(request.body.sname);
 
 
-   console.log("Create new Account");
+
    MongoClient.connect(url, { useNewUrlParser: true }, (err, client) => {
 
       if (err) throw err;
       db = client.db("trainer");
-      var myobj = { account: "TEST", password: "test", name: "Test_Name", surname: "Test_Surname", age: "22" };
-      db.collection("user").insertOne(myobj, function (err, res) {
-         if (err) throw err;
-         console.log("User added"); 
-         response.render("signup_ok");
-      }
-      )})
+
+      db.collection("user").find({ account: request.body.account }).toArray().then(json => {
+         if (json.length > 0) {
+            response.render("signup_fail");
+         } else {
+            console.log("Create new Account");
+            // Notwendigkeit von Passwort und Account
+            if (request.body.account && request.body.password) {
+               var myobj = { account: request.body.account, password: request.body.password, name: request.body.name, surname: request.body.sname, age: "22", buddies:[] };
+               db.collection("user").insertOne(myobj, function (err, res) {
+                  console.log("User added");
+                  response.render("signup_ok");
+               })
+            } else {
+               response.render("signup_pw_acc");
+            }
+
+         }
+      })
 
 
+   })
 });
 //Sessions
 
 
-app.use(bodyParser.urlencoded({extended : false}));
+
 //app.use(bodyParser.json());
 
 // for Authentication
