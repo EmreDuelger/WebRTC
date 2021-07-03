@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<!--
+ *  Copyright (c) 2015 The WebRTC project authors. All Rights Reserved.
+ *
+ *  Use of this source code is governed by a BSD-style license
+ *  that can be found in the LICENSE file in the root of the source
+ *  tree.
+-->
+<html>
+
+<head>
+   <title>trAiner - your digital homegym-buddy</title>
+   <link rel="stylesheet" href="node_modules/bootstrap/dist/css/bootstrap.min.css" />
+   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<style>
+   body {
+      background: #eee;
+      padding: 5% 0;
+   }
+
+   video {
+      background: black;
+      border: 1px solid gray;
+   }
+
+   .container {
+      width: 360px;
+      height: 640px;
+      overflow: hidden;
+   }
+
+   #fileVideo {
+      position: absolute;
+   }
+
+   #localVideo {
+      width: 360px;
+      height: 640px;
+      object-fit: cover;
+      object-position: center;
+      margin-left: -247px;
+      position: absolute;
+   }
+
+   #localVideoCanvas {
+      width: 360px;
+      height: 640px;
+      object-fit: cover;
+      object-position: center;
+      margin-left: -247px;
+      position: absolute;
+   }
+
+   .slider {
+      -webkit-appearance: none;
+      width: 300px;
+      height: 25px;
+      background: #d3d3d3;
+      outline: none;
+      opacity: 0.7;
+      -webkit-transition: .2s;
+      transition: opacity .2s;
+   }
+
+   .slider:hover {
+      opacity: 1;
+   }
+
+   .slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 25px;
+      height: 25px;
+      background: #04AA6D;
+      cursor: pointer;
+   }
+
+   .slider::-moz-range-thumb {
+      width: 25px;
+      height: 25px;
+      background: #04AA6D;
+      cursor: pointer;
+   }
+</style>
+
+<body onload="bindPage()">
+   <select name="videotype" id="videotype" onchange="changeVideotypeSelector(this.value)">
+      <option value="webcam">Webcam</option>
+      <option value="file">Local Video File</option>
+   </select>
+   <input id="fileselector" type="file" accept="video/*" onchange="playSelectedFile(this.files[0])"
+      style="display: none;" />
+   <select name="modeltype" id="modeltype" onchange="changeModelSelector(this.value)">
+      <option value="speed">Speed (Low Accuracy / No-GPU / Mobile) [MobileNet 0.5 Mulitplier]</option>
+      <option value="mixed">Mixed (Balanced Speed/Accuracy / Low-End GPU) [MobileNet 0.75 Mulitplier]</option>
+      <option value="accuracy">Accuracy (Low Speed / High-End GPU) [ResNet]</option>
+   </select>
+   <div>
+      <input type="range" id="poseconfidence" name="poseconfidence" min="0" max="1" value="0.3" step="0.02"
+         class="slider" onchange="changePoseConfidence(this.value)">
+      <label for="poseconfidence">Pose-Confidence</label>
+   </div>
+
+   <div>
+      <input type="range" id="partconfidence" name="partconfidence" min="0" max="1" value="0.3" step="0.02"
+         class="slider" onchange="changePartConfidence(this.value)">
+      <label for="partconfidence">Part-Confidence</label>
+   </div>
+
+   <button id="playbutton" type="button" onclick="togglePlay()" style="display: none;">Play/Pause</button>
+   <button id="downloadbutton" type="button" onclick="DownloadJSON()" style="display: none;">Download 0 Poses
+      (JSON)</button>
+
+   <div id="loading" style="display:flex;">
+      Loading Model...
+   </div>
+   <div id="main" style="display:none;">
+      <div class='container'>
+         <video id="localVideo" autoplay></video>
+         <video id="fileVideo" style="display: none;"></video>
+         <canvas id="localVideoCanvas"></canvas>
+      </div>
+   </div>
+
+   <canvas id="chart_leftLegAngle" style="width: 900px; height: 300px"></canvas>
+   <canvas id="chart_rightLegAngle" style="width: 900px; height: 300px"></canvas>
+   <canvas id="chart_leftUpperBodyDistance" style="width: 900px; height: 300px"></canvas>
+   <canvas id="chart_rightUpperBodyDistance" style="width: 900px; height: 300px"></canvas>
+   <canvas id="chart_shoulderDistance" style="width: 900px; height: 300px"></canvas>
+   <canvas id="chart_kneeDistance" style="width: 900px; height: 300px"></canvas>
+   <canvas id="chart_leftAnkleKneeXDif" style="width: 900px; height: 300px"></canvas>
+   <canvas id="chart_rightAnkleKneeXDif" style="width: 900px; height: 300px"></canvas>
+   <canvas id="chart_leftHipKneeYDif" style="width: 900px; height: 300px"></canvas>
+   <canvas id="chart_rightHipKneeYDif" style="width: 900px; height: 300px"></canvas>
+
+
+
+   <script src="/js/videoanalyzer.js"></script>
+   <script src="https://unpkg.com/@tensorflow/tfjs"></script>
+   <script src="https://unpkg.com/@tensorflow-models/posenet"></script>
+   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+</body>
+
+</html>

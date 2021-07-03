@@ -20,6 +20,12 @@
       padding: 5% 0;
    }
 
+   #video-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, 360px);
+      grid-auto-rows: 360px;
+   }
+
    video {
       background: black;
       border: 1px solid gray;
@@ -31,16 +37,12 @@
       overflow: hidden;
    }
 
-   #fileVideo {
-      position: absolute;
-   }
-
    #localVideo {
       width: 360px;
       height: 640px;
       object-fit: cover;
       object-position: center;
-      margin-left: -247px;
+      margin-left: -12px;
       position: absolute;
    }
 
@@ -49,7 +51,7 @@
       height: 640px;
       object-fit: cover;
       object-position: center;
-      margin-left: -247px;
+      margin-left: -12px;
       position: absolute;
    }
 
@@ -86,12 +88,6 @@
 </style>
 
 <body onload="bindPage()">
-   <select name="videotype" id="videotype" onchange="changeVideotypeSelector(this.value)">
-      <option value="webcam">Webcam</option>
-      <option value="file">Local Video File</option>
-   </select>
-   <input id="fileselector" type="file" accept="video/*" onchange="playSelectedFile(this.files[0])"
-      style="display: none;" />
    <select name="modeltype" id="modeltype" onchange="changeModelSelector(this.value)">
       <option value="speed">Speed (Low Accuracy / No-GPU / Mobile) [MobileNet 0.5 Mulitplier]</option>
       <option value="mixed">Mixed (Balanced Speed/Accuracy / Low-End GPU) [MobileNet 0.75 Mulitplier]</option>
@@ -109,32 +105,126 @@
       <label for="partconfidence">Part-Confidence</label>
    </div>
 
-   <button id="playbutton" type="button" onclick="togglePlay()" style="display: none;">Play/Pause</button>
-   <button id="downloadbutton" type="button" onclick="DownloadJSON()" style="display: none;">Download 0 Poses
+   <button id="togglePoseEstimationButton" type="button" onclick="togglePoseEstimation()">Start Estimation</button>
+   <button id="downloadbutton" type="button" onclick="DownloadJSON()">Download 0 Poses
       (JSON)</button>
+   <button id="workoutButton" type="button" onclick="getWorkouts()">Retrieve Workouts</button>
 
-   <div id="loading" style="display:flex;">
-      Loading Model...
-   </div>
-   <div id="main" style="display:none;">
-      <div class='container'>
-         <video id="localVideo" autoplay></video>
-         <video id="fileVideo" style="display: none;"></video>
-         <canvas id="localVideoCanvas"></canvas>
+
+   <div id="video-grid">
+      <div id="loading" style="display:flex;">
+         Loading Model...
       </div>
+      <div id="main" style="display:none;">
+         <div class='container'>
+            <video id="localVideo" autoplay></video>
+            <canvas id="localVideoCanvas"></canvas>
+         </div>
+      </div>
+
+      <div class="content">
+         <div class="row">
+
+            <div class="col-lg-6" style="width: 400px;">
+               <div class="card">
+                  <div class="card-body">
+                     <canvas id="chart_leftLegAngle"></canvas>
+                  </div>
+               </div>
+            </div><!-- /# column -->
+            <div class="col-lg-6" style="width: 400px;">
+               <div class="card">
+                  <div class="card-body">
+                     <canvas id="chart_rightLegAngle"></canvas>
+                  </div>
+               </div>
+            </div><!-- /# column -->
+         </div>
+      </div>
+
+      <div class="content">
+         <div class="row">
+            <div class="col-lg-6" style="width: 400px;">
+               <div class="card">
+                  <div class="card-body">
+                     <canvas id="chart_leftUpperBodyDistance"></canvas>
+                  </div>
+               </div>
+            </div><!-- /# column -->
+            <div class="col-lg-6" style="width: 400px;">
+               <div class="card">
+                  <div class="card-body">
+                     <canvas id="chart_rightUpperBodyDistance"></canvas>
+                  </div>
+               </div>
+            </div><!-- /# column -->
+         </div>
+      </div>
+
+      <div class="content">
+         <div class="row">
+            <div class="col-lg-6" style="width: 400px;">
+               <div class="card">
+                  <div class="card-body">
+                     <canvas id="chart_shoulderDistance"></canvas>
+                  </div>
+               </div>
+            </div><!-- /# column -->
+            <div class="col-lg-6" style="width: 400px;">
+               <div class="card">
+                  <div class="card-body">
+                     <canvas id="chart_kneeDistance"></canvas>
+                  </div>
+               </div>
+            </div><!-- /# column -->
+         </div>
+      </div>
+
+      <div class="content">
+         <div class="row">
+            <div class="col-lg-6" style="width: 400px;">
+               <div class="card">
+                  <div class="card-body">
+                     <canvas id="chart_leftAnkleKneeXDif"></canvas>
+                  </div>
+               </div>
+            </div><!-- /# column -->
+            <div class="col-lg-6" style="width: 400px;">
+               <div class="card">
+                  <div class="card-body">
+                     <canvas id="chart_rightAnkleKneeXDif"></canvas>
+                  </div>
+               </div>
+            </div><!-- /# column -->
+         </div>
+      </div>
+
+      <div class="content">
+         <div class="row">
+            <div class="col-lg-6" style="width: 400px;">
+               <div class="card">
+                  <div class="card-body">
+                     <canvas id="chart_leftHipKneeYDif"></canvas>
+                  </div>
+               </div>
+            </div><!-- /# column -->
+            <div class="col-lg-6" style="width: 400px;">
+               <div class="card">
+                  <div class="card-body">
+                     <canvas id="chart_rightHipKneeYDif"></canvas>
+                  </div>
+               </div>
+            </div><!-- /# column -->
+
+         </div><!-- .animated -->
+      </div>
+      <!-- /.content -->
    </div>
 
-   <canvas id="chart_leftLegAngle" style="width: 900px; height: 300px"></canvas>
-   <canvas id="chart_rightLegAngle" style="width: 900px; height: 300px"></canvas>
-   <canvas id="chart_leftUpperBodyDistance" style="width: 900px; height: 300px"></canvas>
-   <canvas id="chart_rightUpperBodyDistance" style="width: 900px; height: 300px"></canvas>
-   <canvas id="chart_shoulderDistance" style="width: 900px; height: 300px"></canvas>
-   <canvas id="chart_kneeDistance" style="width: 900px; height: 300px"></canvas>
-   <canvas id="chart_leftAnkleKneeXDif" style="width: 900px; height: 300px"></canvas>
-   <canvas id="chart_rightAnkleKneeXDif" style="width: 900px; height: 300px"></canvas>
-   <canvas id="chart_leftHipKneeYDif" style="width: 900px; height: 300px"></canvas>
-   <canvas id="chart_rightHipKneeYDif" style="width: 900px; height: 300px"></canvas>
+   </div>
 
+
+   </div>
 
 
    <script src="/js/videoanalyzer.js"></script>

@@ -322,6 +322,34 @@ app.get("/videoanalyzer", function(req, res){
 });
 
 
+app.get("/workouts", function (req, res) {
+
+
+   if (req.session.loggedin) {
+      
+      console.log("start DB-Query!");
+      MongoClient.connect(url, { useNewUrlParser: true }, (err, client) => {
+
+         if (err) throw err;
+         db = client.db("trainer");
+         db.collection("workouts").find({ name: "Double Squad Workout MVP" }).toArray().then(json => {
+
+            if (json.length > 0) {
+               console.log(json)
+               res.json(json);
+            }
+         })
+      })
+   }
+   else {
+
+      res.redirect("/home");
+   }
+
+
+});
+
+
 app.get('/users', function(req, res){
 
    var obj = users;

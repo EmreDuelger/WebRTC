@@ -1,0 +1,113 @@
+[
+	{
+		"name": "Double Squad Workout MVP",
+		"author": "Hendrik",
+		"exercises": [
+			{
+				"exerciseName": "Preparation",
+				"goalType": "time",
+				"goalValue": 10
+			},
+			{
+				"exerciseName": "Squad",
+				"goalType": "time",
+				"goalValue": 60,
+				"paramCountThreshold": 3,
+				"neutralName": "stand",
+				"movementName": "squad",
+				"params": [
+					{
+						"param": "leftLegAngle",
+						"type": "drop",
+						"movement": 130,
+						"neutral": 160
+					},
+					{
+						"param": "rightLegAngle",
+						"type": "drop",
+						"movement": 130,
+						"neutral": 160
+					},
+					{
+						"param": "leftUpperBodyDistance",
+						"type": "differ",
+						"movement": -30,
+						"neutral": 30
+					},
+					{
+						"param": "rightUpperBodyDistance",
+						"type": "differ",
+						"movement": -30,
+						"neutral": 30
+					},
+					{
+						"param": "leftHipKneeYDif",
+						"type": "rise",
+						"movement": -50,
+						"neutral": -70
+					},
+					{
+						"param": "rightHipKneeYDif",
+						"type": "rise",
+						"movement": -50,
+						"neutral": -70
+					}
+				]
+			},
+			{
+				"exerciseName": "Break",
+				"goalType": "time",
+				"goalValue": 10
+			},
+			{
+				"exerciseName": "Squad",
+				"goalType": "count",
+				"goalValue": 10,
+				"paramCountThreshold": 3,
+				"neutralName": "stand",
+				"movementName": "squad",
+				"params": [
+					{
+						"param": "leftLegAngle",
+						"type": "drop",
+						"movement": 130,
+						"neutral": 160
+					},
+					{
+						"param": "rightLegAngle",
+						"type": "drop",
+						"movement": 130,
+						"neutral": 160
+					},
+					{
+						"param": "leftUpperBodyDistance",
+						"type": "differ",
+						"movement": -30,
+						"neutral": 30
+					},
+					{
+						"param": "rightUpperBodyDistance",
+						"type": "differ",
+						"movement": -30,
+						"neutral": 30
+					},
+					{
+						"param": "leftHipKneeYDif",
+						"type": "rise",
+						"movement": -50,
+						"neutral": -70
+					},
+					{
+						"param": "rightHipKneeYDif",
+						"type": "rise",
+						"movement": -50,
+						"neutral": -70
+					}
+				]
+			},
+			{
+				"exerciseName": "Finish"
+			}
+		]
+	}
+]

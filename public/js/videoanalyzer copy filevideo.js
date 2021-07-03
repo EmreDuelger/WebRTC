@@ -7,6 +7,7 @@
  */
 'use strict';
 
+var fileVideo = document.querySelector('#fileVideo');
 var localVideo = document.querySelector('#localVideo');
 var localVideoCanvas = document.querySelector('#localVideoCanvas');
 
@@ -18,7 +19,6 @@ var videowidth = 853;
 var poseconfidence = 0.3;
 var partconfidence = 0.3;
 var poses = new Array();
-var estimate = false;
 document.getElementById("downloadbutton").textContent = 'Download ' + poses.length + ' Poses (JSON)';
 
 const color = "aqua";
@@ -28,6 +28,7 @@ const lineWidth = 2;
 var net = null;
 var changeModel = false;
 var modeltype = "speed";
+var videotype = "webcam";
 
 var labels = [1];
 var leftLegAngle = [0];
@@ -41,16 +42,16 @@ var rightAnkleKneeXDif = [0];
 var leftHipKneeYDif = [0];
 var rightHipKneeYDif = [0];
 
-var roll_5_median_leftLegAngle = [0, 0, 0, 0, 0];
-var roll_5_median_rightLegAngle = [0, 0, 0, 0, 0];
-var roll_5_median_leftUpperBodyDistance = [0, 0, 0, 0, 0];
-var roll_5_median_rightUpperBodyDistance = [0, 0, 0, 0, 0];
-var roll_5_median_shoulderDistance = [0, 0, 0, 0, 0];
-var roll_5_median_kneeDistance = [0, 0, 0, 0, 0];
-var roll_5_median_leftAnkleKneeXDif = [0, 0, 0, 0, 0];
-var roll_5_median_rightAnkleKneeXDif = [0, 0, 0, 0, 0];
-var roll_5_median_leftHipKneeYDif = [0, 0, 0, 0, 0];
-var roll_5_median_rightHipKneeYDif = [0, 0, 0, 0, 0];
+var roll_5_median_leftLegAngle = [0,0,0,0,0];
+var roll_5_median_rightLegAngle = [0,0,0,0,0];
+var roll_5_median_leftUpperBodyDistance = [0,0,0,0,0];
+var roll_5_median_rightUpperBodyDistance = [0,0,0,0,0];
+var roll_5_median_shoulderDistance = [0,0,0,0,0];
+var roll_5_median_kneeDistance = [0,0,0,0,0];
+var roll_5_median_leftAnkleKneeXDif = [0,0,0,0,0];
+var roll_5_median_rightAnkleKneeXDif = [0,0,0,0,0];
+var roll_5_median_leftHipKneeYDif = [0,0,0,0,0];
+var roll_5_median_rightHipKneeYDif = [0,0,0,0,0];
 
 const canvas_leftLegAngle = document.getElementById('chart_leftLegAngle');
 const chart_leftLegAngle = new Chart(canvas_leftLegAngle, {
@@ -66,7 +67,7 @@ const chart_leftLegAngle = new Chart(canvas_leftLegAngle, {
       }]
    },
    options: {
-      responsive: true,
+      responsive: false,
       animation: false
    }
 });
@@ -84,7 +85,7 @@ const chart_rightLegAngle = new Chart(canvas_rightLegAngle, {
       }]
    },
    options: {
-      responsive: true,
+      responsive: false,
       animation: false
    }
 });
@@ -102,7 +103,7 @@ const chart_leftUpperBodyDistance = new Chart(canvas_leftUpperBodyDistance, {
       }]
    },
    options: {
-      responsive: true,
+      responsive: false,
       animation: false
    }
 });
@@ -120,7 +121,7 @@ const chart_rightUpperBodyDistance = new Chart(canvas_rightUpperBodyDistance, {
       }]
    },
    options: {
-      responsive: true,
+      responsive: false,
       animation: false
    }
 });
@@ -138,7 +139,7 @@ const chart_shoulderDistance = new Chart(canvas_shoulderDistance, {
       }]
    },
    options: {
-      responsive: true,
+      responsive: false,
       animation: false
    }
 });
@@ -156,7 +157,7 @@ const chart_kneeDistance = new Chart(canvas_kneeDistance, {
       }]
    },
    options: {
-      responsive: true,
+      responsive: false,
       animation: false
    }
 });
@@ -174,7 +175,7 @@ const chart_leftAnkleKneeXDif = new Chart(canvas_leftAnkleKneeXDif, {
       }]
    },
    options: {
-      responsive: true,
+      responsive: false,
       animation: false
    }
 });
@@ -192,7 +193,7 @@ const chart_rightAnkleKneeXDif = new Chart(canvas_rightAnkleKneeXDif, {
       }]
    },
    options: {
-      responsive: true,
+      responsive: false,
       animation: false
    }
 });
@@ -210,7 +211,7 @@ const chart_leftHipKneeYDif = new Chart(canvas_leftHipKneeYDif, {
       }]
    },
    options: {
-      responsive: true,
+      responsive: false,
       animation: false
    }
 });
@@ -228,7 +229,7 @@ const chart_rightHipKneeYDif = new Chart(canvas_rightHipKneeYDif, {
       }]
    },
    options: {
-      responsive: true,
+      responsive: false,
       animation: false
    }
 });
@@ -357,14 +358,14 @@ function angle_calc(p0, p1, p2) {
 
 function median(values) {
 
-   const sorted = [...values].sort(function (a, b) { return a - b; });
+   const sorted = [...values].sort( function(a,b) {return a - b;} );
 
-   var half = Math.floor(sorted.length / 2);
+   var half = Math.floor(sorted.length/2);
 
-   if (sorted.length % 2)
-      return sorted[half];
+   if(sorted.length % 2)
+       return sorted[half];
    else
-      return (sorted[half - 1] + sorted[half]) / 2.0;
+       return (sorted[half-1] + sorted[half]) / 2.0;
 }
 
 function calculate_pose_metrics(pose) {
@@ -411,7 +412,7 @@ function calculate_pose_metrics(pose) {
    leftHipKneeYDif.push(median(roll_5_median_leftHipKneeYDif));
    rightHipKneeYDif.push(median(roll_5_median_rightHipKneeYDif));
 
-   labels.push(Math.max(...labels) + 1);
+   labels.push(Math.max(...labels)+1);
 
    if (labels.length > 500) {
       labels.shift();
@@ -426,7 +427,7 @@ function calculate_pose_metrics(pose) {
       leftHipKneeYDif.shift();
       rightHipKneeYDif.shift();
    }
-
+      
    chart_leftLegAngle.update();
    chart_rightLegAngle.update();
    chart_leftUpperBodyDistance.update();
@@ -439,6 +440,8 @@ function calculate_pose_metrics(pose) {
    chart_rightHipKneeYDif.update();
 
 }
+
+
 
 function detectPose() {
    async function poseDetectionFrame() {
@@ -463,13 +466,25 @@ function detectPose() {
          changeModel = false;
       }
 
-      if (estimate) {
-         var pose = await net.estimateSinglePose(localVideo);
-         //console.log(pose);
-         calculate_pose_metrics(pose);
-         drawCanvas(pose);
-         poses.push(pose);
-         document.getElementById("downloadbutton").textContent = 'Download ' + poses.length + ' Poses (JSON)';
+      switch (videotype) {
+         case "webcam":
+            var pose = await net.estimateSinglePose(localVideo);
+            //console.log(pose);
+            calculate_pose_metrics(pose);
+            drawCanvas(pose);
+            break;
+         case "file":
+            if (fileVideo.readyState === 4 && !fileVideo.paused && !fileVideo.ended) {
+               var pose = await net.estimateSinglePose(fileVideo);
+               console.log(pose);
+               drawCanvas(pose);
+               //Build a JSON array containing pose records.
+               poses.push(pose);
+               document.getElementById("downloadbutton").textContent = 'Download ' + poses.length + ' Poses (JSON)';
+            }
+            break;
+         default:
+            break;
       }
 
       requestAnimationFrame(poseDetectionFrame);
@@ -516,24 +531,61 @@ function changeModelSelector(type) {
    modeltype = type;
 }
 
+function changeVideotypeSelector(type) {
+   switch (type) {
+      case "webcam":
+         localVideo.style.display = 'block';
+         fileVideo.style.display = 'none';
+         document.getElementById("fileselector").style.display = 'none';
+         document.getElementById("playbutton").style.display = 'none';
+         document.getElementById("downloadbutton").style.display = 'none';
+         document.getElementById("fileselector").file = '';
+         break;
+      case "file":
+         localVideo.style.display = 'none';
+         fileVideo.style.display = 'block';
+         document.getElementById("fileselector").style.display = 'block';
+         document.getElementById("playbutton").style.display = 'block';
+         document.getElementById("downloadbutton").style.display = 'block';
+
+         break;
+      default:
+         break;
+   }
+   videotype = type;
+}
+
+function playSelectedFile(file) {
+   var type = file.type;
+   var canPlay = fileVideo.canPlayType(type);
+   if (canPlay === '') canPlay = 'no';
+   var message = 'Can play type "' + type + '": ' + canPlay;
+   var isError = canPlay === 'no';
+   if (isError) {
+      return;
+   }
+
+   var fileURL = URL.createObjectURL(file);
+   fileVideo.src = fileURL;
+   fileVideo.height = videoheight;
+   fileVideo.width = videowidth;
+   poses = new Array();
+   document.getElementById("downloadbutton").textContent = 'Download ' + poses.length + ' Poses (JSON)';
+}
+
+function togglePlay() {
+   if (fileVideo.paused || fileVideo.ended) {
+      fileVideo.play();
+   } else {
+      fileVideo.pause();
+   }
+}
+
 function changePoseConfidence(conf) {
    poseconfidence = conf;
 }
 function changePartConfidence(conf) {
    partconfidence = conf;
-}
-
-function togglePoseEstimation() {
-   if (estimate) {
-      document.getElementById("togglePoseEstimationButton").textContent = 'Start Estimation';
-      estimate = false;
-   }
-   else {
-      poses = new Array();
-      document.getElementById("togglePoseEstimationButton").textContent = 'Stop Estimation';
-      document.getElementById("downloadbutton").textContent = 'Download 0 Poses (JSON)';
-      estimate = true;
-   }
 }
 
 function DownloadJSON() {
@@ -544,19 +596,3 @@ function DownloadJSON() {
    a.download = 'poses.json';
    a.click();
 }
-
-function getWorkouts() {
-   fetch('http://localhost:8080/workouts')
-      .then(function (res) {
-         console.log("res:");
-         console.log(res.json());
-         return res.json();
-      })
-      .then(function (data) {
-         console.log("data:");
-         console.log(data);
-      })
-      .catch(function (error) {
-
-      });
-};
