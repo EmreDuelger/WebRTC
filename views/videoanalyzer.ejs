@@ -108,7 +108,7 @@
    <button id="togglePoseEstimationButton" type="button" onclick="togglePoseEstimation()">Start Estimation</button>
    <button id="downloadbutton" type="button" onclick="DownloadJSON()">Download 0 Poses
       (JSON)</button>
-   <button id="workoutButton" type="button" onclick="getWorkouts()">Retrieve Workouts</button>
+   <button id="workoutButton" type="button" onclick="runWorkout()">Run Workout</button>
 
 
    <div id="video-grid">
@@ -147,63 +147,6 @@
             <div class="col-lg-6" style="width: 400px;">
                <div class="card">
                   <div class="card-body">
-                     <canvas id="chart_leftUpperBodyDistance"></canvas>
-                  </div>
-               </div>
-            </div><!-- /# column -->
-            <div class="col-lg-6" style="width: 400px;">
-               <div class="card">
-                  <div class="card-body">
-                     <canvas id="chart_rightUpperBodyDistance"></canvas>
-                  </div>
-               </div>
-            </div><!-- /# column -->
-         </div>
-      </div>
-
-      <div class="content">
-         <div class="row">
-            <div class="col-lg-6" style="width: 400px;">
-               <div class="card">
-                  <div class="card-body">
-                     <canvas id="chart_shoulderDistance"></canvas>
-                  </div>
-               </div>
-            </div><!-- /# column -->
-            <div class="col-lg-6" style="width: 400px;">
-               <div class="card">
-                  <div class="card-body">
-                     <canvas id="chart_kneeDistance"></canvas>
-                  </div>
-               </div>
-            </div><!-- /# column -->
-         </div>
-      </div>
-
-      <div class="content">
-         <div class="row">
-            <div class="col-lg-6" style="width: 400px;">
-               <div class="card">
-                  <div class="card-body">
-                     <canvas id="chart_leftAnkleKneeXDif"></canvas>
-                  </div>
-               </div>
-            </div><!-- /# column -->
-            <div class="col-lg-6" style="width: 400px;">
-               <div class="card">
-                  <div class="card-body">
-                     <canvas id="chart_rightAnkleKneeXDif"></canvas>
-                  </div>
-               </div>
-            </div><!-- /# column -->
-         </div>
-      </div>
-
-      <div class="content">
-         <div class="row">
-            <div class="col-lg-6" style="width: 400px;">
-               <div class="card">
-                  <div class="card-body">
                      <canvas id="chart_leftHipKneeYDif"></canvas>
                   </div>
                </div>
@@ -219,6 +162,13 @@
          </div><!-- .animated -->
       </div>
       <!-- /.content -->
+
+      <div>
+         <h1 id="exerciseName">Waiting for host to start</h1>
+         <h2 id="goal"></h1>
+         <h2 id="counter"></h1>
+         <h4 id="following"></h2>
+      </div>
    </div>
 
    </div>

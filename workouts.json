@@ -29,18 +29,6 @@
 						"neutral": 160
 					},
 					{
-						"param": "leftUpperBodyDistance",
-						"type": "differ",
-						"movement": -30,
-						"neutral": 30
-					},
-					{
-						"param": "rightUpperBodyDistance",
-						"type": "differ",
-						"movement": -30,
-						"neutral": 30
-					},
-					{
 						"param": "leftHipKneeYDif",
 						"type": "rise",
 						"movement": -50,
@@ -78,18 +66,6 @@
 						"type": "drop",
 						"movement": 130,
 						"neutral": 160
-					},
-					{
-						"param": "leftUpperBodyDistance",
-						"type": "differ",
-						"movement": -30,
-						"neutral": 30
-					},
-					{
-						"param": "rightUpperBodyDistance",
-						"type": "differ",
-						"movement": -30,
-						"neutral": 30
 					},
 					{
 						"param": "leftHipKneeYDif",
