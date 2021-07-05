@@ -1,0 +1,55 @@
+<!doctype html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7" lang=""> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8" lang=""> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9" lang=""> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang=""> <!--<![endif]-->
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>trAiner - your digital home gym buddy</title>
+    
+    <link rel="stylesheet" href="public\css\login.css" />
+  
+     
+</head>
+
+<body>
+    <div class="form">
+
+            <div id="signup">
+                <H1 id="Welcome">hello <%=username%>!</H1>
+
+                <form action="/createworkout" method="post">
+
+                    
+                        <div class="field-wrap">
+                        <label type="text" for = "createworkout" class = "sr-only">Workout room <span class="req">*</span></label> 
+                        <input
+                        type="text"
+                        name="createworkout"
+                        id="createworkout"
+                        class="form-control formgroup"
+                        required = "" autofocus = ""
+                        />
+                        </div>    
+                   
+                    <button type="submit" class="button button-block" >Create workout room!</button>
+                
+                </form>
+
+            </div>
+
+
+        
+        <!-- /#right-panel -->
+    </div>
+
+    <!-- Scripts -->
+    <script src="node_modules/jquery/dist/jquery.js"></script>
+    <script src="public/js/login.js"></script>
+    <!--Local Stuff-->
+    <script>
+       
+    </script>
+</body>
+</html>

@@ -91,32 +91,143 @@ app.get("/home", function(req, res){
    res.render("signup"); // index refers to index.ejs
 });
 
+app.get("/workout", function(req, res){
+   
+   if(req.session.loggedin){
+      
+      
+      //console.log(req.session.cookie.expires);
+      res.render("workouts", {
+         "username": req.session.username
+      });
+  }
+  else{
 
-app.get("/dashboard", function(req, res){
+   res.redirect("/home");
+  }
+  
+});
+
+app.post("/createworkout", function(req, res){
    //res.sendFile(`${__dirname}/Frontend/dashboard/dashboard.html`);
    //console.log(req.session.cookie);
-   if(req.session.loggedin)
-   {
-      
-         console.log("start DB-Query!");
-         MongoClient.connect(url, { useNewUrlParser: true }, (err, client) => {
-   
-            if (err) throw err;
-            db = client.db("trainer");
-            db.collection("user").find({account:req.session.username}).toArray().then(json => {
-   
-               if (json.length > 0) {
-                  console.log(json[0].buddies)
-                  req.session.buddies=json[0].buddies;
-                   res.render("dashboard", {
-                  "buddies": json[0].buddies,
-                  "username": req.session.username
-                   });
-               }})})
+   if (req.session.loggedin) {
+
+      console.log("start DB-Query!");
+      MongoClient.connect(url, { useNewUrlParser: true }, (err, client) => {
+
+         if (err) throw err;
+         db = client.db("trainer");
+         console.log(req.body.createworkout);
+         db.collection("workouts").find({name:req.body.createworkout }).toArray().then(json => {
+            console.log(json);
+            if (json.length > 0) {
+               console.log("if!");
+               res.render("failedtocreateworkout");
+            }
+            else {
+               console.log("else!");
+               console.log(req.session.createworkout);
+               db.collection("workouts").insertOne({ "name": req.body.createworkout, "link": "http:localhost:8080/?"+req.body.createworkout, "participants": 0}, function (err, success) {
+                  console.log(success);
+               });
+               res.render("workout_ok");
+
+            };
+         })
+      })
    }
-   else{
-            res.redirect("/home");
-         };
+   
+});
+
+
+
+app.get("/dashboard", function (req, res) {
+   //res.sendFile(`${__dirname}/Frontend/dashboard/dashboard.html`);
+   //console.log(req.session.cookie);
+   
+   if (req.session.loggedin) {
+      
+   const status= [];
+   const workoutname= [];
+   const workoutlink= [];
+   const participants= [];
+
+      console.log("start DB-Query!");
+      MongoClient.connect(url, { useNewUrlParser: true }, (err, client) => {
+         
+
+         if (err) throw err;
+         db = client.db("trainer");
+         db.collection("workouts").find({}).toArray().then(workout => {
+            
+            if(workout.length > 0){
+               for (let f = 0; f <  workout.length; f++) {
+                  console.log(workout[f].name);
+                  workoutname[f]=workout[f].name;
+                  workoutlink[f]=workout[f].link;
+                  participants[f]=workout[f].participants;
+               }
+
+            }else{
+               workoutname[0]="Create Workoutroom!";
+               workoutlink[0]="/";
+               participants[0]="/";
+            }
+            
+
+         })
+         db.collection("user").find({ account: req.session.username }).toArray().then(json => {
+            
+            if (json.length > 0) {
+               //console.log(json[0].buddies)
+               req.session.buddies = json[0].buddies;
+
+               db.collection("sessions").find({}).toArray().then(sessions => {
+                  
+                 //console.log(status);
+                  for (let i = 0; i <  req.session.buddies.length; i++) {
+
+                    //console.log(sessions[0].session.loggedin);
+                    // 0="Offline" ; 1="Online"
+                    status.push(0);
+                    // console.log(req.session.buddies.length);
+                     for (let j = 0; j < sessions.length; j++) {
+                        //console.log(sessions[j].session.username);
+                       // console.log(req.session.buddies[i]);
+                        if(req.session.buddies[i]==sessions[j].session.username){
+                           console.log("Treffer");
+                           status[i]= 1;
+                        } else{
+                           console.log("kein Treffer")
+                        }
+                     }
+                  }
+                  console.log(status);
+               })
+                     
+               console.log(req.session.buddies);
+
+               res.render("dashboard", {
+                  "buddies": req.session.buddies,
+                  "status": status,
+                  "workoutname": workoutname,
+                  "workoutlink": workoutlink,
+                  "participants": participants,
+                  "username": req.session.username
+                })         
+                     
+                  
+
+                  
+            }
+         })
+      })
+     
+   }
+   else {
+      res.redirect("/home");
+   };
 });
 
    //console.log(req.isAuthenticated);

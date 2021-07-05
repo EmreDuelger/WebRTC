@@ -6,7 +6,7 @@
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>Ela Admin - HTML5 Admin Template</title>
+    <title>trAiner - your digital home gym buddy</title>
     <meta name="description" content="Ela Admin - HTML5 Admin Template">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
@@ -158,15 +158,17 @@
                                     </div>
                                     <div class="stat-content">
                                         <div class="text-left dib">
-                                            <div class="stat-text">$<span class="count">23569</span></div>
-                                            <div class="stat-heading">workouts</div>
-                                            <a class="fa fa-plus"></a>
+                                            <div class="stat-text"><span class="count">4</span></div>
+                                            <div class="stat-heading">Create Workout</div>
+                                         
+                                            <a href='workout' class="fa fa-plus"></a>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
+
                     <div class="col-lg-3 col-md-6">
                         <div class="card">
                             <div class="card-body">
@@ -218,7 +220,12 @@
                                                         </div>
                                                     </td>
                                                     <td>
-                                                        <span class="badge badge-complete">Online</span>
+                                                        <% if (status[i] === 1) { %>
+                                                            <span class="badge badge-complete">Online</span>
+                                                            <%} else { %>
+                                                                <span class="badge badge-pending">Offline</span>
+                                                            <%}%>
+                                                        
                                                     </td>
                                                     <td>  <span class="name"><%=buddies[i]%></span> </td>
                                                   
@@ -237,7 +244,50 @@
                         </div>
                     </div>
 
-                    
+                    <div class="row">
+                        <div class="col-lg-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <strong class="card-title">Workout rooms</strong>
+                                </div>
+                                <div class="table-stats order-table ov-h">
+                                    <table class="table ">
+                                        <thead>
+                                            <tr>
+                                                
+                                                <th>Name</th>
+                                                <th>Link</th>
+                                                <th>Participants</th>
+                                                
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <%for (var i=0; i<workoutname.length;i++) {%>
+                                            
+                                                <tr>
+                                                    <td class="name">
+                                                        
+                                                        <span class="name"><%=workoutname[i]%></span>
+                                                    
+                                                    </td>
+                                                    <td>
+                                                        <a href="/?<%=workoutname[i]%>"><%=workoutlink[i]%></a>
+                                                    </td>
+                                                    <td>  <span class="name"><%=participants[i]%></span> </td>
+                                                  
+                                                   
+                                                   
+                                                </tr>
+                                                <%};%>
+    
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div> <!-- /.table-stats -->
+                            </div>
+                        </div>
+                    </div>
+
 
                 </div>
             </div>
