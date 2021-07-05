@@ -119,7 +119,7 @@ app.post("/createworkout", function(req, res){
          if (err) throw err;
          db = client.db("trainer");
          console.log(req.body.createworkout);
-         db.collection("workouts").find({name:req.body.createworkout }).toArray().then(json => {
+         db.collection("workoutroom").find({name:req.body.createworkout }).toArray().then(json => {
             console.log(json);
             if (json.length > 0) {
                console.log("if!");
@@ -128,7 +128,7 @@ app.post("/createworkout", function(req, res){
             else {
                console.log("else!");
                console.log(req.session.createworkout);
-               db.collection("workouts").insertOne({ "name": req.body.createworkout, "link": "http:localhost:8080/?"+req.body.createworkout, "participants": 0}, function (err, success) {
+               db.collection("workoutroom").insertOne({ "name": req.body.createworkout, "link": "http:localhost:8080/?"+req.body.createworkout, "participants": 0}, function (err, success) {
                   console.log(success);
                });
                res.render("workout_ok");
@@ -159,7 +159,7 @@ app.get("/dashboard", function (req, res) {
 
          if (err) throw err;
          db = client.db("trainer");
-         db.collection("workouts").find({}).toArray().then(workout => {
+         db.collection("workoutroom").find({}).toArray().then(workout => {
             
             if(workout.length > 0){
                for (let f = 0; f <  workout.length; f++) {
@@ -204,24 +204,22 @@ app.get("/dashboard", function (req, res) {
                      }
                   }
                   console.log(status);
+                  res.render("dashboard", {
+                     "buddies": req.session.buddies,
+                     "status": status,
+                     "workoutname": workoutname,
+                     "workoutlink": workoutlink,
+                     "participants": participants,
+                     "username": req.session.username
+                   })      
                })
                      
                console.log(req.session.buddies);
-
-               res.render("dashboard", {
-                  "buddies": req.session.buddies,
-                  "status": status,
-                  "workoutname": workoutname,
-                  "workoutlink": workoutlink,
-                  "participants": participants,
-                  "username": req.session.username
-                })         
-                     
-                  
-
-                  
+  
             }
+            
          })
+            
       })
      
    }
