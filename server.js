@@ -203,6 +203,8 @@ app.get("/dashboard", function (req, res) {
                         }
                      }
                   }
+
+                  req.session.status=status;
                   console.log(status);
                   res.render("dashboard", {
                      "buddies": req.session.buddies,
@@ -240,6 +242,7 @@ app.get("/videocall", function(req, res){
       //console.log(req.session.cookie.expires);
       res.render("videocall", {
          "buddies": req.session.buddies,
+         "status": req.session.status,
          "username": req.session.username
       });
   }

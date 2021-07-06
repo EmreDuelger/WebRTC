@@ -219,11 +219,18 @@ function captureVideo() {
 
 if (callBtn) {
    callBtn.addEventListener("click", function () {
-      var callToUsername = callToUsernameInput.value;
+      //var callToUsername = callToUsernameInput.value;
+      var sel = document.getElementById('myList').value;
+      console.log(sel);
 
-      if (callToUsername.length > 0) {
+      if (/*callToUsername.length > 0 ||*/ sel.length > 0) {
 
-         connectedUser = callToUsername;
+        // if(callToUsername.length > 0){
+            //connectedUser = callToUsername;
+         //}else{
+            connectedUser = sel;
+       //  }
+            
 
          // create an offer 
          yourConn.createOffer(function (offer) {
@@ -393,3 +400,6 @@ if (localVideo) {
       loadPosenet();
    })
 };
+
+
+

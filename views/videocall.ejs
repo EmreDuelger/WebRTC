@@ -62,13 +62,15 @@
             <select id="myList">
                <option> ---Choose room--- </option>
                <%for (var i=0; i<buddies.length;i++) {%>
-                  
-                  <option> <%=buddies[i]%></option>
+
+                     <% if (status[i] === 1) { %>
+                        <option> <%=buddies[i]%></option>
+                         <%}%>
                   
                       
                   <%};%>
             </select>
-            <input id="callToUsernameInput" type="text" placeholder="username to call" />
+            
             <button id="callBtn" class="btn-success btn">Call</button>
             <button id="hangUpBtn" class="btn-danger btn">Hang Up</button>
          </div>
