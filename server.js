@@ -550,7 +550,7 @@ app.post('/auth', function(request, response) {
                request.session.username = username;
                console.log(request.session.loggedin); // variable mit Session
                //Angabe der Cookie-Dauer
-               var minutes = 10*60000;
+               var minutes = 100*60000;
                request.session.cookie.expires = new Date(Date.now() + minutes)
                request.session.cookie.maxAge = minutes;
                //request.session.success = 'You are successfully registered and logged in ' + username + '!';
