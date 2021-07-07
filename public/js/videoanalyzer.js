@@ -480,7 +480,7 @@ function detectPose() {
 
       if (estimate) {
          var pose = await net.estimateSinglePose(localVideo);
-         //console.log(pose);
+         console.log(pose);
          calculate_pose_metrics(pose);
          drawCanvas(pose);
          poses.push(pose);

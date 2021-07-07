@@ -17,9 +17,43 @@
 //var name = username;
 var password;
 var connectedUser;
+var serverIP = '192.168.178.21' //your server-IP or 'localhost' when running locally
+
+//Status Variables
+var estimate = false;
+var workout_running = false;
+var net = null;
+const speed = {
+   architecture: 'MobileNetV1',
+   outputStride: 16,
+   inputResolution: 200,
+   multiplier: 0.5
+};
+var videoheight = 640;
+var videowidth = 853;
+var poseconfidence = 0.3;
+var partconfidence = 0.3;
+
+var workout = null;
+var current_exercise = null;
+var current_exercise_pose = null;
+var repcount = 0;
+var moved_to = false;
+var moved_back = false;
+
+var labels = [1];
+var leftLegAngle = [0];
+var rightLegAngle = [0];
+var leftHipKneeYDif = [0];
+var rightHipKneeYDif = [0];
+
+var roll_5_median_leftLegAngle = [0, 0, 0, 0, 0];
+var roll_5_median_rightLegAngle = [0, 0, 0, 0, 0];
+var roll_5_median_leftHipKneeYDif = [0, 0, 0, 0, 0];
+var roll_5_median_rightHipKneeYDif = [0, 0, 0, 0, 0];
 
 //connecting to our signaling server
-var conn = new WebSocket('ws://localhost:9090');
+var conn = new WebSocket('ws://' + serverIP + ':9090');
 
 conn.onopen = function () {
    console.log("Connected to the signaling server");
@@ -85,88 +119,27 @@ var callToUsernameInput = document.querySelector('#callToUsernameInput');
 var callBtn = document.querySelector('#callBtn');
 
 var signupdBtn = document.querySelector('#signupdBtn');
-
 var hangUpBtn = document.querySelector('#hangUpBtn');
 
 var localVideo = document.querySelector('#localVideo');
 var remoteVideo = document.querySelector('#remoteVideo');
 
+const div_videoGridLocal = document.getElementById('videoGridLocal');
+const div_videoGridGuest = document.getElementById('videoGridGuest');
+const div_videoGridCall = document.getElementById('videoGridCall');
+const div_videoGridWorkout = document.getElementById('videoGridWorkout');
+
+const h1_exerciseName = document.getElementById('exerciseName');
+const btn_workoutButton = document.getElementById('workoutButton');
+const h2_goal = document.getElementById('goal');
+const h2_counter = document.getElementById('counter');
+const h4_following = document.getElementById('following');
+
 var yourConn;
 var stream;
 
-
-// Login when the user clicks the button
-/*if(loginBtn){
-   loginBtn.addEventListener("click", function (event) {
-      console.log("clicked!");
-      name = usernameInput.value;
-      password = userpasswordInput.value;
-      console.log(name);
-      console.log(password);
-      if (name.length > 0 && password.length > 0) {
-         const Data= {"username": name, "password": password}
-         const otheparam ={
-         headers: {
-            "content-type":"application/json; charset=UTF-8"
-         },
-         body:Data,
-         method:"POST"   
-     };
-         console.log(otheparam.body);
-         fetch("http://localhost:8080/auth", otheparam)
-         .then(data=>{console.log(data.data)})
-         .then(res=>{console.log(res)})
-         //$.post("/auth", {"username": name, "password": password});
-         console.log("Name and password are correct.")
-      } else {
-         alert("Ooops...Please enter account and password or sign-up!");
-
-      }
-
-   })};*/
-
-/*function handleLogin(success) { 
-   if (success === false) { 
-      console.log("if", success);
-      alert("Ooops...try a different username");
-
-   } else { 
-      console.log("else", success);
-      //loginPage.style.display = "none"; 
-      alert("Websocket-Connection established!");
-      //callPage.style.display = "block";
-      //captureVideo();
-
-     // window.location = "/dashboard";
-
-      //console.log('test')
-      //********************** 
-      //Starting a peer connection 
-      //********************** 
-      //using Google public stun server 
-      
-   }
-};*/
-
-
-
 function captureVideo() {
-
-
-
-   // if (success === false) { 
-   //  console.log("if", success);
-   // alert("Login failed");
-
-   //}
-
-
-   //send({ 
-   //  type: "call", 
-   // name: name 
-   //  }); 
-
-
+   
    //getting local video stream 
    navigator.webkitGetUserMedia({ video: true, audio: true }, function (myStream) {
 
@@ -178,8 +151,8 @@ function captureVideo() {
       //displaying local video stream on the page 
       localVideo.srcObject = stream;
 
-      localVideo.height = 480;
-      localVideo.width = 640;
+      localVideo.height = videoheight;
+      localVideo.width = videowidth;
 
 
       //using Google public stun server 
@@ -197,6 +170,8 @@ function captureVideo() {
 
          //displaying remote video stream on the page 
          remoteVideo.srcObject = e.stream;
+         div_videoGridGuest.style.display = '';
+         div_videoGridCall.style.display = 'none';
 
       };
 
@@ -212,39 +187,6 @@ function captureVideo() {
 
    }, function (error) {
       console.log(error);
-   })
-};
-
-//initiating a call 
-
-if (callBtn) {
-   callBtn.addEventListener("click", function () {
-      //var callToUsername = callToUsernameInput.value;
-      var sel = document.getElementById('myList').value;
-      console.log(sel);
-
-      if (/*callToUsername.length > 0 ||*/ sel.length > 0) {
-
-        // if(callToUsername.length > 0){
-            //connectedUser = callToUsername;
-         //}else{
-            connectedUser = sel;
-       //  }
-            
-
-         // create an offer 
-         yourConn.createOffer(function (offer) {
-            send({
-               type: "offer",
-               offer: offer
-            });
-
-            yourConn.setLocalDescription(offer);
-         }, function (error) {
-            alert("Error when creating an offer");
-         });
-
-      }
    })
 };
 
@@ -277,18 +219,6 @@ function handleCandidate(candidate) {
    yourConn.addIceCandidate(new RTCIceCandidate(candidate));
 };
 
-//hang up
-if (hangUpBtn) {
-   hangUpBtn.addEventListener("click", function () {
-
-      send({
-         type: "leave"
-      });
-
-      handleLeave();
-   })
-};
-
 function handleLeave() {
    connectedUser = null;
    remoteVideo.srcObject = null;
@@ -297,79 +227,240 @@ function handleLeave() {
    yourConn.close();
    yourConn.onicecandidate = null;
    yourConn.onaddstream = null;
+
+   div_videoGridGuest.style.display = 'none';
+   div_videoGridCall.style.display = '';
 };
 
-var firstclick = 0;
-var list = [];
+//Helper Functions
+function delay(t) {
+   return new Promise(resolve => {
+      setTimeout(resolve, t);
+   });
+}
 
-function getList() {
-   fetch('http://localhost:8080/users')
-      .then(function (res) {
-         //console.log(res.json());
-         return res.json();
-         //console.log(res.json());
-      })
-      .then(function (data) {
-         const items = data;
-         console.log(items.users.length)
-         list = items.users;
-      })
-      .catch(function (error) {
+function togglePoseEstimation() {
+   if (estimate) {
+      estimate = false;
+   }
+   else {
+      estimate = true;
+   }
+}
 
-      });
-};
+function find_point(pose, p) {
+   const points = pose["keypoints"];
+   for (let i = 0; i < points.length; i++) {
+      const keypoint = points[i];
 
-function getUsers() {
-
-   getList();
-
-   var users = document.getElementById('myList');
-
-   //console.log(list);
-   var opt = null;
-   var i = 0;
-
-   if (firstclick == 0) {
-      console.log(firstclick);
-      for (i = 0; i < list.length; i++) {
-         opt = document.createElement('option');
-         //console.log(list[i]);
-         opt.value = list[i];
-         //console.log(opt.value);
-         opt.innerHTML = list[i];
-         users.appendChild(opt);
-         firstclick = firstclick + 1;
-         console.log(firstclick);
+      if (keypoint.part == p && keypoint.score >= 0.5) {
+         return [Math.round(keypoint.position.x), Math.round(keypoint.position.y)];
       }
    }
-};
+   return null;
+}
 
-var net = null;
-var modeltype = "speed";
-const speed = {
-   architecture: 'MobileNetV1',
-   outputStride: 32,
-   inputResolution: { width: 640, height: 480 },
-   multiplier: 0.5
-};
-const mixed = {
-   architecture: 'MobileNetV1',
-   outputStride: 16,
-   inputResolution: { width: 640, height: 480 },
-   multiplier: 0.75
-};
-const accuracy = {
-   architecture: 'ResNet50',
-   outputStride: 32,
-   inputResolution: { width: 640, height: 480 },
-   quantBytes: 2
-};
+function xDif(p0, p1) {
+   if (p0 !== null && p1 !== null) {
+      return p0[0] - p1[0];
+   } else {
+      return null;
+   }
+}
+
+function yDif(p0, p1) {
+   if (p0 !== null && p1 !== null) {
+      return p0[1] - p1[1];
+   } else {
+      return null;
+   }
+}
+
+function euclidian(p0, p1) {
+   if (p0 !== null && p1 !== null) {
+      return Math.sqrt(xDif(p0, p1) ** 2 + yDif(p0, p1) ** 2);
+   } else {
+      return null;
+   }
+}
+
+function angle_calc(p0, p1, p2) {
+   if (p0 !== null && p1 !== null && p2 !== null) {
+      var angle = 0;
+      try {
+         var a = (p1[0] - p0[0]) ** 2 + (p1[1] - p0[1]) ** 2
+         var b = (p1[0] - p2[0]) ** 2 + (p1[1] - p2[1]) ** 2
+         var c = (p2[0] - p0[0]) ** 2 + (p2[1] - p0[1]) ** 2
+         angle = Math.acos((a + b - c) / Math.sqrt(4 * a * b)) * 180 / Math.PI
+      } catch (error) {
+         return 0;
+      }
+      return Math.round(angle)
+   } else {
+      return null;
+   }
+}
+
+function median(values) {
+
+   const sorted = [...values].sort(function (a, b) { return a - b; });
+
+   var half = Math.floor(sorted.length / 2);
+
+   if (sorted.length % 2)
+      return sorted[half];
+   else
+      return (sorted[half - 1] + sorted[half]) / 2.0;
+}
+
+function calculate_pose_metrics(pose) {
+   const leftHip = find_point(pose, 'leftHip');
+   const rightHip = find_point(pose, 'rightHip');
+   const leftKnee = find_point(pose, 'leftKnee');
+   const rightKnee = find_point(pose, 'rightKnee');
+   const leftAnkle = find_point(pose, 'leftAnkle');
+   const rightAnkle = find_point(pose, 'rightAnkle');
+
+
+   roll_5_median_leftLegAngle.push(angle_calc(leftHip, leftKnee, leftAnkle));
+   roll_5_median_rightLegAngle.push(angle_calc(rightHip, rightKnee, rightAnkle));
+   roll_5_median_leftHipKneeYDif.push(yDif(leftHip, leftKnee));
+   roll_5_median_rightHipKneeYDif.push(yDif(rightHip, rightKnee));
+
+   roll_5_median_leftLegAngle.shift();
+   roll_5_median_rightLegAngle.shift();
+   roll_5_median_leftHipKneeYDif.shift();
+   roll_5_median_rightHipKneeYDif.shift();
+
+   leftLegAngle.push(median(roll_5_median_leftLegAngle))
+   rightLegAngle.push(median(roll_5_median_rightLegAngle));
+   leftHipKneeYDif.push(median(roll_5_median_leftHipKneeYDif));
+   rightHipKneeYDif.push(median(roll_5_median_rightHipKneeYDif));
+
+   labels.push(Math.max(...labels) + 1);
+
+   if (labels.length > 500) {
+      labels.shift();
+      leftLegAngle.shift();
+      rightLegAngle.shift();
+      leftHipKneeYDif.shift();
+      rightHipKneeYDif.shift();
+   }
+}
+
+function getCurrentMetric(param) {
+   switch (param) {
+      case "leftLegAngle":
+         return leftLegAngle[leftLegAngle.length - 1];
+      case "rightLegAngle":
+         return rightLegAngle[rightLegAngle.length - 1];
+      case "leftHipKneeYDif":
+         return leftHipKneeYDif[leftHipKneeYDif.length - 1];
+      case "rightHipKneeYDif":
+         return rightHipKneeYDif[rightHipKneeYDif.length - 1];
+      default:
+         return null;
+   }
+}
+
+function checkRepCount() {
+   if (moved_to && moved_back) {
+      repcount++;
+      moved_back = false;
+      moved_to = false;
+      h2_counter.innerHTML = "Reps: " + repcount;
+   }
+}
+
+function switchCurrentExercisePose() {
+   switch (current_exercise_pose) {
+      case "movement":
+         current_exercise_pose = "neutral";
+         moved_back = true;
+         break;
+      case "neutral":
+         current_exercise_pose = "movement";
+         moved_to = true;
+         break;
+      default:
+         break;
+   }
+
+   checkRepCount();
+
+   console.log("Current Pose: " + current_exercise_pose);
+}
+
+function evaluateExercise() {
+   if (current_exercise !== null && current_exercise.params !== undefined) {
+      var hits = 0;
+      if (current_exercise_pose == 'neutral') {
+         for (let i = 0; i < current_exercise.params.length; i++) {
+            var hit = false;
+            var metric = getCurrentMetric(current_exercise.params[i].param);
+            if (metric !== null) {
+               switch (current_exercise.params[i].type) {
+                  case "drop":
+                     if (metric < current_exercise.params[i].movement) {
+                        hit = true;
+                     }
+                     break;
+                  case "rise":
+                     if (metric > current_exercise.params[i].movement) {
+                        hit = true;
+                     }
+                     break;
+                  default:
+                     break;
+               }
+               if (hit) {
+                  hits++;
+               }
+            }
+         }
+      }
+      if (current_exercise_pose == 'movement') {
+         for (let i = 0; i < current_exercise.params.length; i++) {
+            var hit = false;
+            var metric = getCurrentMetric(current_exercise.params[i].param);
+            if (metric !== null) {
+               switch (current_exercise.params[i].type) {
+                  case "drop":
+                     if (metric > current_exercise.params[i].neutral) {
+                        hit = true;
+                     }
+                     break;
+                  case "rise":
+                     if (metric < current_exercise.params[i].neutral) {
+                        hit = true;
+                     }
+                     break;
+                  default:
+                     break;
+               }
+               if (hit) {
+                  hits++;
+               } else {
+               }
+            }
+         }
+      }
+
+      if (hits >= current_exercise.paramCountThreshold) {
+         switchCurrentExercisePose();
+      }
+   }
+}
 
 function detectPose() {
    async function poseDetectionFrame() {
 
-      var pose = await net.estimateSinglePose(localVideo);
-      console.log(pose);
+      if (estimate) {
+         var pose = await net.estimateSinglePose(localVideo);
+         console.log(pose);
+         calculate_pose_metrics(pose);
+         evaluateExercise();
+      }
 
       requestAnimationFrame(poseDetectionFrame);
    }
@@ -377,29 +468,113 @@ function detectPose() {
    poseDetectionFrame();
 }
 
-async function loadPosenet()  {
-   switch (modeltype) {
-      case 'speed':
-         net = await posenet.load(speed);
+async function handleExercise(exercise, following) {
+   h1_exerciseName.innerHTML = exercise.exerciseName;
+   if (following !== undefined) {
+      h4_following.innerHTML = "Following: " + following.exerciseName;
+   } else {
+      h4_following.innerHTML = "";
+   }
+   repcount = 0;
+   h2_counter.innerHTML = "";
+   console.log(exercise.exerciseName + " started");
+   current_exercise_pose = "neutral";
+   current_exercise = exercise;
+   togglePoseEstimation();
+   switch (exercise.goalType) {
+      case "time":
+         for (let i = exercise.goalValue; i > 0; i--) {
+            //print Timer            
+            h2_goal.innerHTML = "Goal: " + i + " sek";
+            await delay(1000);
+         }
          break;
-      case 'mixed':
-         net = await posenet.load(mixed);
-         break;
-      case 'accuracy':
-         net = await posenet.load(accuracy);
+      case "count":
+         h2_goal.innerHTML = "Goal: " + exercise.goalValue + " reps";
+         do {
+            await delay(500);
+         } while (repcount < exercise.goalValue)
          break;
       default:
+         //Finish
          break;
    }
-   detectPose();
+   console.log(exercise.exerciseName + " finished");
+   current_exercise = null;
+   current_exercise_pose = null;
+   togglePoseEstimation();
 }
 
-if (localVideo) {
-   localVideo.addEventListener('loadeddata', function () {
-      console.log("Video loaded")
-      loadPosenet();
-   })
+async function getWorkout() {
+   return fetch('http://localhost:8080/workouts')
+      .then((response) => response.json())
+      .then((responseJson) => { return responseJson[0] });
 };
 
+async function runWorkout() {
+   if (!workout_running) {
+      workout_running = true;
+      btn_workoutButton.style.display = "none";
+      workout = await getWorkout();
+      //setTitleOutput
+      for (let i = 0; i < workout.exercises.length; i++) {
+         await handleExercise(workout.exercises[i], workout.exercises[i + 1]);
+      }
+      workout_running = false;
+   } else {
+      console.log("workout is running");
+   }
+   btn_workoutButton.style.display = "";
+}
 
+async function bindPage() {
 
+   //initiating a call 
+   if (callBtn) {
+      callBtn.addEventListener("click", function () {
+         var sel = document.getElementById('myList').value;
+         console.log(sel);
+
+         if (sel.length > 0) {
+
+            connectedUser = sel;
+
+            // create an offer 
+            yourConn.createOffer(function (offer) {
+               send({
+                  type: "offer",
+                  offer: offer
+               });
+
+               yourConn.setLocalDescription(offer);
+            }, function (error) {
+               alert("Error when creating an offer");
+            });
+
+         }
+      })
+   };
+
+   //hang up
+   if (hangUpBtn) {
+      hangUpBtn.addEventListener("click", function () {
+
+         send({
+            type: "leave"
+         });
+
+         handleLeave();
+      })
+   };
+
+   net = await posenet.load(speed);
+
+   captureVideo();
+
+   if (localVideo) {
+      localVideo.addEventListener('loadeddata', function () {
+         console.log("Video loaded")
+         detectPose();
+      })
+   };
+}
