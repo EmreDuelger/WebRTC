@@ -506,7 +506,7 @@ async function handleExercise(exercise, following) {
 }
 
 async function getWorkout() {
-   return fetch('http://localhost:8080/workouts')
+   return fetch('http://'+serverIP+':8080/workouts')
       .then((response) => response.json())
       .then((responseJson) => { return responseJson[0] });
 };

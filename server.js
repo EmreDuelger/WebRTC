@@ -70,6 +70,9 @@ app.use(session({
 	saveUninitialized: true
 }));
 
+var cors = require('cors');
+app.use(cors());
+
 app.set("view engine", "ejs");
 
 // use express static to deliver resources HTML, CSS, JS, etc)
