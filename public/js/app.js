@@ -18,6 +18,7 @@
 var password;
 var connectedUser;
 var serverIP = '192.168.178.21' //your server-IP or 'localhost' when running locally
+//var serverIP = 'localhost'
 
 //Status Variables
 var estimate = false;
@@ -86,6 +87,12 @@ conn.onmessage = function (msg) {
       case "leave":
          handleLeave();
          break;
+      case "startWorkout":
+         runWorkout(false);
+         break;
+      case "repCount":
+         handleGuestRepCount(data.repCount);
+         break;
       default:
          break;
    }
@@ -130,16 +137,18 @@ const div_videoGridCall = document.getElementById('videoGridCall');
 const div_videoGridWorkout = document.getElementById('videoGridWorkout');
 
 const h1_exerciseName = document.getElementById('exerciseName');
+const h1_guestName = document.getElementById('guestName');
 const btn_workoutButton = document.getElementById('workoutButton');
 const h2_goal = document.getElementById('goal');
 const h2_counter = document.getElementById('counter');
+const h2_guestCounter = document.getElementById('guestCounter');
 const h4_following = document.getElementById('following');
 
 var yourConn;
 var stream;
 
 function captureVideo() {
-   
+
    //getting local video stream 
    navigator.webkitGetUserMedia({ video: true, audio: true }, function (myStream) {
 
@@ -173,6 +182,7 @@ function captureVideo() {
          div_videoGridGuest.style.display = '';
          div_videoGridCall.style.display = 'none';
 
+
       };
 
       // Setup ice handling 
@@ -193,6 +203,7 @@ function captureVideo() {
 //when somebody sends us an offer 
 function handleOffer(offer, name) {
    connectedUser = name;
+   h1_guestName.innerHTML = connectedUser;
    yourConn.setRemoteDescription(new RTCSessionDescription(offer));
 
    //create an answer to an offer 
@@ -231,6 +242,10 @@ function handleLeave() {
    div_videoGridGuest.style.display = 'none';
    div_videoGridCall.style.display = '';
 };
+
+function handleGuestRepCount(guestRepCount) {
+   h2_guestCounter.innerHTML = "Reps: " + guestRepCount;
+}
 
 //Helper Functions
 function delay(t) {
@@ -369,6 +384,10 @@ function checkRepCount() {
       moved_back = false;
       moved_to = false;
       h2_counter.innerHTML = "Reps: " + repcount;
+      send({
+         type: "repCount",
+         repCount: repcount
+      });
    }
 }
 
@@ -392,7 +411,7 @@ function switchCurrentExercisePose() {
 }
 
 function evaluateExercise() {
-   if (current_exercise !== null && current_exercise.params !== undefined) {
+  // if (current_exercise !== null && current_exercise.params !== undefined) {
       var hits = 0;
       if (current_exercise_pose == 'neutral') {
          for (let i = 0; i < current_exercise.params.length; i++) {
@@ -449,13 +468,13 @@ function evaluateExercise() {
       if (hits >= current_exercise.paramCountThreshold) {
          switchCurrentExercisePose();
       }
-   }
+   //}
 }
 
 function detectPose() {
    async function poseDetectionFrame() {
 
-      if (estimate) {
+      if (current_exercise !== null && current_exercise.params !== undefined) {
          var pose = await net.estimateSinglePose(localVideo);
          console.log(pose);
          calculate_pose_metrics(pose);
@@ -477,23 +496,30 @@ async function handleExercise(exercise, following) {
    }
    repcount = 0;
    h2_counter.innerHTML = "";
+   h2_guestCounter.innerHTML = "";
    console.log(exercise.exerciseName + " started");
    current_exercise_pose = "neutral";
    current_exercise = exercise;
-   togglePoseEstimation();
+
    switch (exercise.goalType) {
       case "time":
+
+         //togglePoseEstimation();
          for (let i = exercise.goalValue; i > 0; i--) {
             //print Timer            
             h2_goal.innerHTML = "Goal: " + i + " sek";
             await delay(1000);
          }
+         //togglePoseEstimation();
          break;
       case "count":
+
+         //togglePoseEstimation();
          h2_goal.innerHTML = "Goal: " + exercise.goalValue + " reps";
          do {
             await delay(500);
          } while (repcount < exercise.goalValue)
+         //togglePoseEstimation();
          break;
       default:
          //Finish
@@ -502,29 +528,35 @@ async function handleExercise(exercise, following) {
    console.log(exercise.exerciseName + " finished");
    current_exercise = null;
    current_exercise_pose = null;
-   togglePoseEstimation();
+
 }
 
 async function getWorkout() {
-   return fetch('http://'+serverIP+':8080/workouts')
+   return fetch('http://' + serverIP + ':8080/workouts', { credentials: 'include' })
       .then((response) => response.json())
       .then((responseJson) => { return responseJson[0] });
 };
 
-async function runWorkout() {
+async function runWorkout(isHost) {
    if (!workout_running) {
+      if (isHost) {
+         send({
+            type: "startWorkout"
+         });
+      }
       workout_running = true;
       btn_workoutButton.style.display = "none";
-      workout = await getWorkout();
+
       //setTitleOutput
       for (let i = 0; i < workout.exercises.length; i++) {
          await handleExercise(workout.exercises[i], workout.exercises[i + 1]);
       }
       workout_running = false;
+      btn_workoutButton.style.display = "";
    } else {
       console.log("workout is running");
    }
-   btn_workoutButton.style.display = "";
+   
 }
 
 async function bindPage() {
@@ -538,7 +570,7 @@ async function bindPage() {
          if (sel.length > 0) {
 
             connectedUser = sel;
-
+            h1_guestName.innerHTML = connectedUser;
             // create an offer 
             yourConn.createOffer(function (offer) {
                send({
@@ -567,6 +599,7 @@ async function bindPage() {
       })
    };
 
+   workout = await getWorkout();
    net = await posenet.load(speed);
 
    captureVideo();

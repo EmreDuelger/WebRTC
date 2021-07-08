@@ -51,10 +51,13 @@
          <H1>
             <%=username%>
          </H1>
+         <h2 id="counter"></h2>
       </div>
       <div id="videoGridGuest" style="display: None">
+         
          <video id="remoteVideo" autoplay></video>
          <H1 id="guestName">Guest</H1>
+         <h2 id="guestCounter"></h2>
          <button id="hangUpBtn" class="btn-danger btn">Hang Up</button>
       </div>
       <div id="videoGridCall">
@@ -75,15 +78,11 @@
          <button id="callBtn" class="btn-success btn">Call</button>
       </div>
       <div id="videoGridWorkout">
-         
-         <button id="workoutButton" type="button" onclick="runWorkout()">Start Workout</button>
+
+         <button id="workoutButton" type="button" onclick="runWorkout(true)">Start Workout</button>
          <h1 id="exerciseName"></h1>
-         <h2 id="goal">
-            </h1>
-            <h2 id="counter">
-               </h1>
-               <h4 id="following">
-            </h2>
+         <h2 id="goal"></h2>
+         <h4 id="following"></h4>
       </div>
 
       <script src="/js/app.js"></script>
