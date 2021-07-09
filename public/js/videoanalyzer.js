@@ -15,6 +15,9 @@ var stream;
 var videoheight = 640;
 var videowidth = 853;
 
+var serverIP = '192.168.178.21' //your server-IP or 'localhost' when running locally
+
+
 var poseconfidence = 0.3;
 var partconfidence = 0.3;
 var poses = new Array();
@@ -478,7 +481,8 @@ function detectPose() {
          changeModel = false;
       }
 
-      if (estimate) {
+      if (current_exercise !== null && current_exercise.params !== undefined) {
+      
          var pose = await net.estimateSinglePose(localVideo);
          console.log(pose);
          calculate_pose_metrics(pose);
@@ -515,6 +519,7 @@ function captureVideo() {
 
 async function bindPage() {
    toggleLoadingUI(true);
+   workout = await getWorkout();
    net = await posenet.load(speed);
    toggleLoadingUI(false);
 
@@ -562,7 +567,7 @@ function DownloadJSON() {
 }
 
 async function getWorkout() {
-   return fetch('http://localhost:8080/workouts')
+   return fetch('http://'+serverIP+':8080/workouts', {credentials: 'include'})
       .then((response) => response.json())
       .then((responseJson) => { return responseJson[0] });
 };
@@ -576,21 +581,6 @@ function delay(t) {
    });
 }
 
-
-var interval;
-
-function check(goalValue) {
-   if (repcount == goalValue) {
-       console.log("check")
-
-       // We don't need to interval the check function anymore,
-       // clearInterval will stop its periodical execution.
-       clearInterval(interval);
-   }
-}
-
-
-
 async function handleExercise(exercise, following) {
    h1_exerciseName.innerHTML = exercise.exerciseName;
    if (following !== undefined) {
@@ -603,7 +593,6 @@ async function handleExercise(exercise, following) {
    console.log(exercise.exerciseName + " started");
    current_exercise_pose = "neutral";
    current_exercise = exercise;
-   togglePoseEstimation();
    switch (exercise.goalType) {
       case "time":
          for (let i = exercise.goalValue; i > 0; i--) {
@@ -625,7 +614,6 @@ async function handleExercise(exercise, following) {
    console.log(exercise.exerciseName + " finished");
    current_exercise = null;
    current_exercise_pose = null;
-   togglePoseEstimation();
 }
 
 var workout_running = false;
@@ -633,7 +621,6 @@ var workout_running = false;
 async function runWorkout() {
    if (!workout_running) {
       workout_running = true;
-      workout = await getWorkout();
       //setTitleOutput
       for (let i = 0; i < workout.exercises.length; i++) {
          await handleExercise(workout.exercises[i], workout.exercises[i + 1]);

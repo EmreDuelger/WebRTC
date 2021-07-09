@@ -411,7 +411,7 @@ function switchCurrentExercisePose() {
 }
 
 function evaluateExercise() {
-  // if (current_exercise !== null && current_exercise.params !== undefined) {
+   if (current_exercise !== null && current_exercise.params !== undefined) {
       var hits = 0;
       if (current_exercise_pose == 'neutral') {
          for (let i = 0; i < current_exercise.params.length; i++) {
@@ -468,7 +468,7 @@ function evaluateExercise() {
       if (hits >= current_exercise.paramCountThreshold) {
          switchCurrentExercisePose();
       }
-   //}
+   }
 }
 
 function detectPose() {
@@ -500,26 +500,19 @@ async function handleExercise(exercise, following) {
    console.log(exercise.exerciseName + " started");
    current_exercise_pose = "neutral";
    current_exercise = exercise;
-
    switch (exercise.goalType) {
       case "time":
-
-         //togglePoseEstimation();
          for (let i = exercise.goalValue; i > 0; i--) {
             //print Timer            
             h2_goal.innerHTML = "Goal: " + i + " sek";
             await delay(1000);
          }
-         //togglePoseEstimation();
          break;
       case "count":
-
-         //togglePoseEstimation();
          h2_goal.innerHTML = "Goal: " + exercise.goalValue + " reps";
          do {
             await delay(500);
          } while (repcount < exercise.goalValue)
-         //togglePoseEstimation();
          break;
       default:
          //Finish
