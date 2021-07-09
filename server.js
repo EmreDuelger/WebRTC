@@ -439,6 +439,20 @@ app.get("/videoanalyzer", function (req, res) {
 });
 
 
+app.get("/webrtcroom", function(req, res){
+
+   if (req.session.loggedin) {
+      res.render('webrtcroom',
+      {
+         "username": req.session.username
+      });
+   }
+   else{
+      res.redirect("/home");
+   }
+
+});
+
 app.get("/workouts", function (req, res) {
 
 
@@ -511,6 +525,9 @@ app.post('/signup', function (request, response) {
 
    })
 });
+
+
+
 //Sessions
 
 

@@ -17,8 +17,7 @@
 //var name = username;
 var password;
 var connectedUser;
-var serverIP = '192.168.178.21' //your server-IP or 'localhost' when running locally
-//var serverIP = 'localhost'
+var serverIP = '192.168.178.31' //your server-IP or 'localhost' when running locally 192.168.178.21
 
 //Status Variables
 var estimate = false;
@@ -604,3 +603,5 @@ async function bindPage() {
       })
    };
 }
+
+
